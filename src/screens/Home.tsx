@@ -370,12 +370,12 @@ const Home: React.FC = () => {
                 </Box>
 
                 <Box className="text-center py-12">
-                    <Typography variant="h6" className="text-gray-600 mb-4 font-semibold">
-                        Contribute to War History Analysis
+                    <Typography variant="h6" className="text-white mb-4 font-semibold">
+                        Upload testimony for analysis
                     </Typography>
-                    <Typography variant="body1" className="text-gray-500 max-w-2xl mx-auto">
+                    {/* <Typography variant="body1" className="text-gray-500 max-w-2xl mx-auto">
                         Upload historical war testimonies for analysis and preservation to help maintain the memory of significant historical events
-                    </Typography>
+                    </Typography> */}
                 </Box>
 
                 <motion.div
@@ -384,7 +384,10 @@ const Home: React.FC = () => {
                     transition={{ duration: 0.5 }}
                 >
                     <UploadContainer className="max-w-2xl mx-auto">
-                        <Box className="flex flex-col items-center space-y-4">
+                        <Box
+                        className="flex flex-col items-center space-y-4"
+                        onClick={() => document.getElementById('fileInput').click()}
+                        style={{ cursor: 'pointer' }}>
                             <motion.div
                                 whileHover={{ scale: 1.1 }}
                                 transition={{ type: 'spring', stiffness: 300 }}
@@ -392,7 +395,9 @@ const Home: React.FC = () => {
                                 <CloudUploadIcon className="upload-icon text-gray-400 text-5xl" />
                             </motion.div>
 
-                            <Box className="text-center space-y-2">
+                            <Box
+                                className="text-center space-y-2"
+                            >
                                 <Typography
                                     variant="body1"
                                     className="text-gray-700 font-medium"
@@ -406,19 +411,14 @@ const Home: React.FC = () => {
                                     or click to browse
                                 </Typography>
                                 <Box className="w-full pt-2">
-                                <input
-                                    type="file"
-                                    accept=".pdf,.doc,.docx,.txt"
-                                    className="opacity-0 w-full h-full cursor-pointer"
-                                    style={{ top: 0, left: 0 }}
-                                />
-                                {/* <UploadButton
-                                    variant="contained"
-                                    startIcon={<CloudUploadIcon />}
-                                >
-                                    Select File
-                                </UploadButton> */}
-                            </Box>
+                                    <input
+                                        id="fileInput"
+                                        type="file"
+                                        accept=".pdf,.doc,.docx,.txt"
+                                        className="opacity-0 w-full h-full cursor-pointer"
+                                        style={{ top: 0, left: 0 }}
+                                    />
+                                </Box>
                                 <Typography
                                     variant="caption"
                                     className="text-gray-400 block"
