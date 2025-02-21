@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+.gradient-bg {
+  background-color: #090947;
+  background-image: linear-gradient(315deg, #090947 0%, #5a585a 74%);
+}
+
+.leaflet-popup-content {
+  margin: 8px 12px;
+}
+
+.leaflet-popup-content h3 {
+  margin-bottom: 4px;
+  color: #1f2937;
+}
+
+.leaflet-popup-content p {
+  margin: 2px 0;
+}
+
+.leaflet-container {
+  font-family: inherit;
+}
