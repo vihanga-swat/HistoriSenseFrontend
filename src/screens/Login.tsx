@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   TextField,
-  Checkbox
+  // Checkbox
 } from '@mui/material';
 import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
@@ -12,7 +12,7 @@ import loginImage from "../assets/images/login.webp";
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
+  // const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
 
   const navigate = useNavigate();
@@ -181,7 +181,7 @@ const Login = () => {
               />
             </div>
 
-            <div className="flex items-center justify-between">
+            {/* <div className="flex items-center justify-between">
               <label className="flex items-center space-x-2 text-sm">
                 <Checkbox
                   checked={rememberMe}
@@ -194,7 +194,7 @@ const Login = () => {
               <a href="#" className="text-indigo-600 text-sm hover:underline">
                 Forgot Password?
               </a>
-            </div>
+            </div> */}
 
             <button
               type="submit"

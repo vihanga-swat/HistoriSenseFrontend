@@ -20,6 +20,7 @@ import PsychologyIcon from '@mui/icons-material/Psychology';
 import TopicIcon from '@mui/icons-material/Topic';
 import PersonIcon from '@mui/icons-material/Person';
 import PublicIcon from '@mui/icons-material/Public';
+import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import Chart from 'chart.js/auto';
 import { MapContainer, TileLayer, CircleMarker, Polyline, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -33,6 +34,7 @@ const Home: React.FC = () => {
     const [showMovements, setShowMovements] = useState(true);
     const emotionsChartRef = useRef<Chart | null>(null);
     const topicsChartRef = useRef<Chart | null>(null);
+    const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
 
     const styles = {
         modalContent: {
@@ -59,7 +61,12 @@ const Home: React.FC = () => {
     const navigate = useNavigate();
 
     const handleLogout = () => {
+        setLogoutConfirmOpen(true);
+    };
+
+    const confirmLogout = () => {
         localStorage.removeItem('token');
+        setLogoutConfirmOpen(false);
         navigate('/login', { replace: true });
     };
 
@@ -184,19 +191,19 @@ const Home: React.FC = () => {
         },
     }));
 
-    const UploadButton = styled(Button)(({ theme }) => ({
-        backgroundColor: '#4f46e5',
-        color: 'white',
-        padding: '0.75rem 2rem',
-        borderRadius: '8px',
-        textTransform: 'none',
-        fontWeight: 600,
-        '&:hover': {
-            backgroundColor: '#4338ca',
-            transform: 'translateY(-2px)',
-        },
-        transition: 'all 0.2s ease',
-    }));
+    // const UploadButton = styled(Button)(({ theme }) => ({
+    //     backgroundColor: '#4f46e5',
+    //     color: 'white',
+    //     padding: '0.75rem 2rem',
+    //     borderRadius: '8px',
+    //     textTransform: 'none',
+    //     fontWeight: 600,
+    //     '&:hover': {
+    //         backgroundColor: '#4338ca',
+    //         transform: 'translateY(-2px)',
+    //     },
+    //     transition: 'all 0.2s ease',
+    // }));
 
     useEffect(() => {
         if (visualizationModalOpen) {
@@ -219,6 +226,77 @@ const Home: React.FC = () => {
 
     return (
         <div className="gradient-bg min-h-screen">
+            <Dialog
+                open={logoutConfirmOpen}
+                onClose={() => setLogoutConfirmOpen(false)}
+                maxWidth="xs"
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        padding: '24px',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                        backgroundColor: '#ffffff',
+                    },
+                }}
+            >
+                <DialogContent sx={{ textAlign: 'center', padding: '0 24px 24px' }}>
+                    {/* <Typography
+                        variant="h5"
+                        sx={{
+                            fontWeight: 600,
+                            color: '#333333',
+                            marginBottom: '16px',
+                        }}
+                    >
+                        Logout Confirmation
+                    </Typography> */}
+                    <MeetingRoomIcon className="text-indigo-600 text-3xl" fontSize='large'/>
+                    <Typography
+                        variant="body1"
+                        sx={{
+                            color: '#666666',
+                            marginBottom: '24px',
+                        }}
+                    >
+                        Are you sure you want to logout?
+                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', gap: '16px' }}>
+                        <Button
+                            variant="outlined"
+                            onClick={() => setLogoutConfirmOpen(false)}
+                            sx={{
+                                textTransform: 'none',
+                                borderRadius: '4px',
+                                borderColor: '#483fdd',
+                                color: '#483fdd',
+                                padding: '8px 16px',
+                                '&:hover': {
+                                    borderColor: '#0056b3',
+                                    backgroundColor: 'rgba(0, 123, 255, 0.04)',
+                                },
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="contained"
+                            onClick={confirmLogout}
+                            sx={{
+                                textTransform: 'none',
+                                borderRadius: '4px',
+                                backgroundColor: '#483fdd',
+                                padding: '8px 16px',
+                                '&:hover': {
+                                    backgroundColor: '#0056b3',
+                                },
+                            }}
+                        >
+                            Confirm
+                        </Button>
+                    </Box>
+                </DialogContent>
+            </Dialog>
             {/* Navigation */}
             <Box component="nav" className="bg-white shadow-lg">
                 <Box className="max-w-7xl mx-auto px-4">
@@ -231,7 +309,10 @@ const Home: React.FC = () => {
                             <Typography className="text-gray-700">
                                 Welcome, {user.name || 'User'}
                             </Typography>
-                            <IconButton onClick={handleLogout} className="text-gray-600 hover:text-indigo-600">
+                            <IconButton
+                                onClick={handleLogout}
+                                className="text-gray-600 hover:text-indigo-600"
+                            >
                                 <LogoutIcon />
                             </IconButton>
                         </Box>
@@ -385,9 +466,9 @@ const Home: React.FC = () => {
                 >
                     <UploadContainer className="max-w-2xl mx-auto">
                         <Box
-                        className="flex flex-col items-center space-y-4"
-                        onClick={() => document.getElementById('fileInput').click()}
-                        style={{ cursor: 'pointer' }}>
+                            className="flex flex-col items-center space-y-4"
+                            onClick={() => document.getElementById('fileInput').click()}
+                            style={{ cursor: 'pointer' }}>
                             <motion.div
                                 whileHover={{ scale: 1.1 }}
                                 transition={{ type: 'spring', stiffness: 300 }}

@@ -27,6 +27,7 @@ import PsychologyIcon from '@mui/icons-material/Psychology';
 import TopicIcon from '@mui/icons-material/Topic';
 import PersonIcon from '@mui/icons-material/Person';
 import PublicIcon from '@mui/icons-material/Public';
+import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import Chart from 'chart.js/auto';
 import { MapContainer, TileLayer, CircleMarker, Polyline, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -40,6 +41,7 @@ const MHome: React.FC = () => {
   const [showMovements, setShowMovements] = useState(true);
   const emotionsChartRef = useRef<Chart | null>(null);
   const topicsChartRef = useRef<Chart | null>(null);
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -201,14 +203,90 @@ const MHome: React.FC = () => {
   }, [visualizationModalOpen]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token'); // Remove JWT token from localStorage
-    navigate('/login', { replace: true }); // Redirect to login page
+    setLogoutConfirmOpen(true);
+  };
+
+  const confirmLogout = () => {
+    localStorage.removeItem('token');
+    setLogoutConfirmOpen(false);
+    navigate('/login', { replace: true });
   };
 
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   return (
     <div className="gradient-bg min-h-screen">
+      <Dialog
+        open={logoutConfirmOpen}
+        onClose={() => setLogoutConfirmOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: {
+            padding: '24px',
+            borderRadius: '8px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            backgroundColor: '#ffffff',
+          },
+        }}
+      >
+        <DialogContent sx={{ textAlign: 'center', padding: '0 24px 24px' }}>
+          {/* <Typography
+                        variant="h5"
+                        sx={{
+                            fontWeight: 600,
+                            color: '#333333',
+                            marginBottom: '16px',
+                        }}
+                    >
+                        Logout Confirmation
+                    </Typography> */}
+          <MeetingRoomIcon className="text-indigo-600 text-3xl" fontSize='large' />
+          <Typography
+            variant="body1"
+            sx={{
+              color: '#666666',
+              marginBottom: '24px',
+            }}
+          >
+            Are you sure you want to logout?
+          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: '16px' }}>
+            <Button
+              variant="outlined"
+              onClick={() => setLogoutConfirmOpen(false)}
+              sx={{
+                textTransform: 'none',
+                borderRadius: '4px',
+                borderColor: '#483fdd',
+                color: '#483fdd',
+                padding: '8px 16px',
+                '&:hover': {
+                  borderColor: '#0056b3',
+                  backgroundColor: 'rgba(0, 123, 255, 0.04)',
+                },
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              onClick={confirmLogout}
+              sx={{
+                textTransform: 'none',
+                borderRadius: '4px',
+                backgroundColor: '#483fdd',
+                padding: '8px 16px',
+                '&:hover': {
+                  backgroundColor: '#0056b3',
+                },
+              }}
+            >
+              Confirm
+            </Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
       {/* Navigation */}
       <Box component="nav" className="bg-white shadow-lg">
         <Box className="max-w-7xl mx-auto px-4">
@@ -221,7 +299,10 @@ const MHome: React.FC = () => {
               <Typography className="text-gray-700">
                 Welcome, {user.name || 'User'} {/* Assuming the user's name is stored under 'name' */}
               </Typography>
-              <IconButton onClick={handleLogout} className="text-gray-600 hover:text-indigo-600">
+              <IconButton
+                onClick={handleLogout}
+                className="text-gray-600 hover:text-indigo-600"
+              >
                 <LogoutIcon />
               </IconButton>
             </Box>
