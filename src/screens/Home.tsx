@@ -7,7 +7,10 @@ import {
     DialogTitle,
     DialogContent,
     Box,
-    Paper
+    Paper,
+    CircularProgress,
+    Snackbar,
+    Alert
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { motion } from 'framer-motion';
@@ -35,6 +38,13 @@ const Home: React.FC = () => {
     const emotionsChartRef = useRef<Chart | null>(null);
     const topicsChartRef = useRef<Chart | null>(null);
     const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
+    const [file, setFile] = useState<File | null>(null);
+    const [uploading, setUploading] = useState(false);
+    const [uploadSuccess, setUploadSuccess] = useState(false);
+    const [uploadError, setUploadError] = useState<string | null>(null);
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [analysisResult, setAnalysisResult] = useState<any>(null);
 
     const styles = {
         modalContent: {
@@ -191,6 +201,94 @@ const Home: React.FC = () => {
         },
     }));
 
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files.length > 0) {
+            const selectedFile = event.target.files[0];
+
+            // Validate file type
+            const validTypes = ['application/pdf'];
+            if (!validTypes.includes(selectedFile.type)) {
+                setUploadError('Invalid file type. Please upload PDF files only.');
+                setSnackbarOpen(true);
+                return;
+            }
+
+            // Validate file size (10MB max)
+            if (selectedFile.size > 10 * 1024 * 1024) {
+                setUploadError('File size exceeds 10MB limit.');
+                setSnackbarOpen(true);
+                return;
+            }
+
+            setFile(selectedFile);
+            setUploadError(null);
+        }
+    };
+
+    const handleUpload = async () => {
+        if (!file) {
+            setUploadError('Please select a file to upload.');
+            setSnackbarOpen(true);
+            return;
+        }
+
+        setUploading(true);
+        setUploadError(null);
+
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('Authentication token not found. Please log in again.');
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('http://localhost:5000/api/analyze-testimony', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData,
+                credentials: 'include' // Important for cookies/session
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to analyze testimony');
+            }
+
+            setUploadSuccess(true);
+            setSnackbarOpen(true);
+            setFile(null);
+
+            // Store analysis results
+            setAnalysisResult(data.analysis);
+
+            // Reset file input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+
+            // Open the visualization modal with the new data
+            setTimeout(() => {
+                setVisualizationModalOpen(true);
+            }, 1000);
+
+        } catch (error) {
+            console.error('Upload error:', error);
+            setUploadError(error.message || 'An error occurred during upload');
+            setSnackbarOpen(true);
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleSnackbarClose = () => {
+        setSnackbarOpen(false);
+    };
+
     // const UploadButton = styled(Button)(({ theme }) => ({
     //     backgroundColor: '#4f46e5',
     //     color: 'white',
@@ -251,7 +349,7 @@ const Home: React.FC = () => {
                     >
                         Logout Confirmation
                     </Typography> */}
-                    <MeetingRoomIcon className="text-indigo-600 text-3xl" fontSize='large'/>
+                    <MeetingRoomIcon className="text-indigo-600 text-3xl" fontSize='large' />
                     <Typography
                         variant="body1"
                         sx={{
@@ -467,52 +565,79 @@ const Home: React.FC = () => {
                     <UploadContainer className="max-w-2xl mx-auto">
                         <Box
                             className="flex flex-col items-center space-y-4"
-                            onClick={() => document.getElementById('fileInput').click()}
+                            onClick={() => fileInputRef.current?.click()}
                             style={{ cursor: 'pointer' }}>
                             <motion.div
                                 whileHover={{ scale: 1.1 }}
                                 transition={{ type: 'spring', stiffness: 300 }}
                             >
-                                <CloudUploadIcon className="upload-icon text-gray-400 text-5xl" />
+                                {uploading ? (
+                                    <CircularProgress size={40} className="text-indigo-600" />
+                                ) : (
+                                    <CloudUploadIcon className="upload-icon text-gray-400 text-5xl" />
+                                )}
                             </motion.div>
 
-                            <Box
-                                className="text-center space-y-2"
-                            >
-                                <Typography
-                                    variant="body1"
-                                    className="text-gray-700 font-medium"
-                                >
-                                    Drag and drop your war testimony files here
+                            <Box className="text-center space-y-2">
+                                {file ? (
+                                    <Typography variant="body1" className="text-gray-700 font-medium">
+                                        Selected file: {file.name}
+                                    </Typography>
+                                ) : (
+                                    <Typography variant="body1" className="text-gray-700 font-medium">
+                                        Drag and drop your war testimony files here
+                                    </Typography>
+                                )}
+
+                                <Typography variant="body2" className="text-gray-500">
+                                    {file ? "Click to change file" : "or click to browse"}
                                 </Typography>
-                                <Typography
-                                    variant="body2"
-                                    className="text-gray-500"
-                                >
-                                    or click to browse
-                                </Typography>
+
                                 <Box className="w-full pt-2">
                                     <input
+                                        ref={fileInputRef}
                                         id="fileInput"
                                         type="file"
                                         accept=".pdf,.doc,.docx,.txt"
                                         className="opacity-0 w-full h-full cursor-pointer"
                                         style={{ top: 0, left: 0 }}
+                                        onChange={handleFileChange}
                                     />
                                 </Box>
-                                <Typography
-                                    variant="caption"
-                                    className="text-gray-400 block"
-                                >
+
+                                <Typography variant="caption" className="text-gray-400 block">
                                     Supported formats: PDF, DOC, DOCX, TXT (up to 10MB)
                                 </Typography>
+
+                                {file && (
+                                    <Button
+                                        variant="contained"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleUpload();
+                                        }}
+                                        disabled={uploading}
+                                        sx={{
+                                            backgroundColor: '#4f46e5',
+                                            '&:hover': {
+                                                backgroundColor: '#4338ca'
+                                            },
+                                            textTransform: 'none',
+                                            borderRadius: '0.5rem',
+                                            padding: '0.5rem 1.5rem',
+                                            marginTop: '1rem'
+                                        }}
+                                    >
+                                        {uploading ? 'Uploading...' : 'Upload Testimony'}
+                                    </Button>
+                                )}
                             </Box>
                         </Box>
                     </UploadContainer>
                 </motion.div>
             </Box>
 
-            {/* Dashboard Modal - Matching Museum Home */}
+            {/* Dashboard Modal */}
             <Dialog
                 open={visualizationModalOpen}
                 onClose={() => setVisualizationModalOpen(false)}
@@ -673,7 +798,7 @@ const Home: React.FC = () => {
                                                         Name
                                                     </Typography>
                                                     <Typography variant="body2" className="font-medium">
-                                                        Poll Smith Vander
+                                                        {analysisResult?.writer_info?.Name || "Not specified"}
                                                     </Typography>
                                                 </Box>
                                                 <Box>
@@ -681,7 +806,7 @@ const Home: React.FC = () => {
                                                         Role
                                                     </Typography>
                                                     <Typography variant="body2" className="font-medium">
-                                                        Soldier
+                                                        {analysisResult?.writer_info?.Role || "Not specified"}
                                                     </Typography>
                                                 </Box>
                                                 <Box>
@@ -689,7 +814,7 @@ const Home: React.FC = () => {
                                                         Age at Time
                                                     </Typography>
                                                     <Typography variant="body2" className="font-medium">
-                                                        24 years
+                                                        {analysisResult?.writer_info?.["Age at time"] || "Not specified"}
                                                     </Typography>
                                                 </Box>
                                                 <Box>
@@ -697,7 +822,7 @@ const Home: React.FC = () => {
                                                         Unit
                                                     </Typography>
                                                     <Typography variant="body2" className="font-medium">
-                                                        4th Infantry
+                                                        {analysisResult?.writer_info?.["Unit (if soldier)"] || "Not specified"}
                                                     </Typography>
                                                 </Box>
                                             </Box>
@@ -710,36 +835,29 @@ const Home: React.FC = () => {
                                             Other People
                                         </Typography>
                                         <Box className="space-y-2">
-                                            <Box className="bg-gray-50 p-3 rounded-lg">
-                                                <Box className="flex justify-between items-start">
-                                                    <Box>
-                                                        <Typography variant="body2" className="font-medium">
-                                                            Commanding Officer
-                                                        </Typography>
+                                            {analysisResult?.people_mentioned?.map((person, index) => (
+                                                <Box key={index} className="bg-gray-50 p-3 rounded-lg">
+                                                    <Box className="flex justify-between items-start">
+                                                        <Box>
+                                                            <Typography variant="body2" className="font-medium">
+                                                                {person.name}
+                                                            </Typography>
+                                                            <Typography variant="caption" className="text-gray-500">
+                                                                {person.role}
+                                                            </Typography>
+                                                        </Box>
                                                         <Typography variant="caption" className="text-gray-500">
-                                                            Military Personnel
+                                                            {person.region}
                                                         </Typography>
                                                     </Box>
-                                                    <Typography variant="caption" className="text-gray-500">
-                                                        2 mentions
-                                                    </Typography>
                                                 </Box>
-                                            </Box>
-                                            <Box className="bg-gray-50 p-3 rounded-lg">
-                                                <Box className="flex justify-between items-start">
-                                                    <Box>
-                                                        <Typography variant="body2" className="font-medium">
-                                                            French Residents
-                                                        </Typography>
-                                                        <Typography variant="caption" className="text-gray-500">
-                                                            Civilians
-                                                        </Typography>
-                                                    </Box>
-                                                    <Typography variant="caption" className="text-gray-500">
-                                                        3 mentions
-                                                    </Typography>
-                                                </Box>
-                                            </Box>
+                                            ))}
+
+                                            {(!analysisResult?.people_mentioned || analysisResult.people_mentioned.length === 0) && (
+                                                <Typography variant="body2" className="text-gray-500 italic">
+                                                    No other people specifically mentioned in the testimony.
+                                                </Typography>
+                                            )}
                                         </Box>
                                     </Box>
                                 </Box>
@@ -832,6 +950,20 @@ const Home: React.FC = () => {
                     </Box>
                 </DialogContent>
             </Dialog>
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={6000}
+                onClose={handleSnackbarClose}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert
+                    onClose={handleSnackbarClose}
+                    severity={uploadError ? "error" : "success"}
+                    sx={{ width: '100%' }}
+                >
+                    {uploadError || "Testimony uploaded successfully!"}
+                </Alert>
+            </Snackbar>
         </div>
     );
 };
