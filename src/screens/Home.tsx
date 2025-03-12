@@ -834,26 +834,33 @@ const Home: React.FC = () => {
                                         <Typography variant="body2" className="font-medium text-gray-600 mb-2">
                                             Other People
                                         </Typography>
-                                        <Box className="space-y-2">
-                                            {analysisResult?.people_mentioned?.map((person, index) => (
-                                                <Box key={index} className="bg-gray-50 p-3 rounded-lg">
-                                                    <Box className="flex justify-between items-start">
-                                                        <Box>
-                                                            <Typography variant="body2" className="font-medium">
-                                                                {person.name}
-                                                            </Typography>
+                                        <Box
+                                            className="space-y-2"
+                                            sx={{
+                                                maxHeight: analysisResult?.people_mentioned?.length > 5 ? '490px' : 'auto',
+                                                overflowY: analysisResult?.people_mentioned?.length > 5 ? 'auto' : 'visible',
+                                                paddingRight: analysisResult?.people_mentioned?.length > 5 ? '8px' : '0'
+                                            }}
+                                        >
+                                            {analysisResult?.people_mentioned && analysisResult.people_mentioned.length > 0 ? (
+                                                analysisResult.people_mentioned.map((person, index) => (
+                                                    <Box key={index} className="bg-gray-50 p-3 rounded-lg">
+                                                        <Box className="flex justify-between items-start">
+                                                            <Box>
+                                                                <Typography variant="body2" className="font-medium">
+                                                                    {person.name !== "Unspecified" ? person.name : "Unknown Person"}
+                                                                </Typography>
+                                                                <Typography variant="caption" className="text-gray-500">
+                                                                    {person.role !== "Unspecified" ? person.role : "Unknown role"}
+                                                                </Typography>
+                                                            </Box>
                                                             <Typography variant="caption" className="text-gray-500">
-                                                                {person.role}
+                                                                {person.region !== "Unspecified" ? person.region : "Unknown location"}
                                                             </Typography>
                                                         </Box>
-                                                        <Typography variant="caption" className="text-gray-500">
-                                                            {person.region}
-                                                        </Typography>
                                                     </Box>
-                                                </Box>
-                                            ))}
-
-                                            {(!analysisResult?.people_mentioned || analysisResult.people_mentioned.length === 0) && (
+                                                ))
+                                            ) : (
                                                 <Typography variant="body2" className="text-gray-500 italic">
                                                     No other people specifically mentioned in the testimony.
                                                 </Typography>
@@ -862,91 +869,93 @@ const Home: React.FC = () => {
                                     </Box>
                                 </Box>
                             </Paper>
-
-                            {/* Geographical Data */}
-                            <Paper
-                                sx={{
-                                    padding: '1rem',
-                                    borderRadius: '0.5rem',
-                                    border: '1px solid rgba(0,0,0,0.12)',
-                                    backgroundColor: '#ffffff'
-                                }}
-                            >
-                                <Box className="flex items-center justify-between mb-4">
-                                    <Box className="flex items-center space-x-2">
-                                        <PublicIcon className="text-red-500" />
-                                        <Typography variant="h6" className="font-semibold text-gray-800">
-                                            Geographical Data
-                                        </Typography>
-                                    </Box>
-                                    <Box className="flex space-x-2">
-                                        <Button
-                                            variant="contained"
-                                            size="small"
-                                            onClick={() => setShowEvents(!showEvents)}
-                                            className={`${showEvents ? 'bg-blue-100 text-blue-800' : 'bg-gray-100'
-                                                } hover:bg-blue-200`}
-                                        >
-                                            Events
-                                        </Button>
-                                        <Button
-                                            variant="contained"
-                                            size="small"
-                                            onClick={() => setShowMovements(!showMovements)}
-                                            className={`${showMovements ? 'bg-green-100 text-green-800' : 'bg-gray-100'
-                                                } hover:bg-green-200`}
-                                        >
-                                            Movements
-                                        </Button>
-                                    </Box>
-                                </Box>
-                                <Box className="h-[300px] rounded-lg">
-                                    <MapContainer
-                                        center={[51.5074, -0.1278]}
-                                        zoom={5}
-                                        className="h-full w-full"
-                                    >
-                                        <TileLayer
-                                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                            attribution='© OpenStreetMap contributors'
-                                        />
-                                        {showEvents && events.map((event, index) => (
-                                            <CircleMarker
-                                                key={index}
-                                                center={event.coordinates}
-                                                radius={8}
-                                                fillColor="#4f46e5"
-                                                color="#fff"
-                                                weight={2}
-                                                opacity={1}
-                                                fillOpacity={0.8}
-                                            >
-                                                <Popup>
-                                                    <Typography variant="subtitle2" className="font-semibold">
-                                                        {event.title}
-                                                    </Typography>
-                                                    <Typography variant="body2" className="text-gray-600">
-                                                        {event.description}
-                                                    </Typography>
-                                                    <Typography variant="caption" className="text-gray-500">
-                                                        {event.date}
-                                                    </Typography>
-                                                </Popup>
-                                            </CircleMarker>
-                                        ))}
-                                        {showMovements && (
-                                            <Polyline
-                                                positions={events.map(event => event.coordinates)}
-                                                color="#10b981"
-                                                weight={2}
-                                                dashArray="5, 5"
-                                                opacity={0.8}
-                                            />
-                                        )}
-                                    </MapContainer>
-                                </Box>
-                            </Paper>
                         </Box>
+                    </Box>
+
+                    <Box className="mt-6">
+                        {/* Geographical Data */}
+                        <Paper
+                            sx={{
+                                padding: '1rem',
+                                borderRadius: '0.5rem',
+                                border: '1px solid rgba(0,0,0,0.12)',
+                                backgroundColor: '#ffffff'
+                            }}
+                        >
+                            <Box className="flex items-center justify-between mb-4">
+                                <Box className="flex items-center space-x-2">
+                                    <PublicIcon className="text-red-500" />
+                                    <Typography variant="h6" className="font-semibold text-gray-800">
+                                        Geographical Data
+                                    </Typography>
+                                </Box>
+                                <Box className="flex space-x-2">
+                                    <Button
+                                        variant="contained"
+                                        size="small"
+                                        onClick={() => setShowEvents(!showEvents)}
+                                        className={`${showEvents ? 'bg-blue-100 text-blue-800' : 'bg-gray-100'
+                                            } hover:bg-blue-200`}
+                                    >
+                                        Events
+                                    </Button>
+                                    <Button
+                                        variant="contained"
+                                        size="small"
+                                        onClick={() => setShowMovements(!showMovements)}
+                                        className={`${showMovements ? 'bg-green-100 text-green-800' : 'bg-gray-100'
+                                            } hover:bg-green-200`}
+                                    >
+                                        Movements
+                                    </Button>
+                                </Box>
+                            </Box>
+                            <Box className="h-[300px] rounded-lg">
+                                <MapContainer
+                                    center={[51.5074, -0.1278]}
+                                    zoom={5}
+                                    className="h-full w-full"
+                                >
+                                    <TileLayer
+                                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                        attribution='© OpenStreetMap contributors'
+                                    />
+                                    {showEvents && events.map((event, index) => (
+                                        <CircleMarker
+                                            key={index}
+                                            center={event.coordinates}
+                                            radius={8}
+                                            fillColor="#4f46e5"
+                                            color="#fff"
+                                            weight={2}
+                                            opacity={1}
+                                            fillOpacity={0.8}
+                                        >
+                                            <Popup>
+                                                <Typography variant="subtitle2" className="font-semibold">
+                                                    {event.title}
+                                                </Typography>
+                                                <Typography variant="body2" className="text-gray-600">
+                                                    {event.description}
+                                                </Typography>
+                                                <Typography variant="caption" className="text-gray-500">
+                                                    {event.date}
+                                                </Typography>
+                                            </Popup>
+                                        </CircleMarker>
+                                    ))}
+                                    {showMovements && (
+                                        <Polyline
+                                            positions={events.map(event => event.coordinates)}
+                                            color="#10b981"
+                                            weight={2}
+                                            dashArray="5, 5"
+                                            opacity={0.8}
+                                        />
+                                    )}
+                                </MapContainer>
+                            </Box>
+                        </Paper>
                     </Box>
                 </DialogContent>
             </Dialog>
