@@ -206,7 +206,7 @@ const Home: React.FC = () => {
             const selectedFile = event.target.files[0];
 
             // Validate file type
-            const validTypes = ['application/pdf'];
+            const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
             if (!validTypes.includes(selectedFile.type)) {
                 setUploadError('Invalid file type. Please upload PDF files only.');
                 setSnackbarOpen(true);
@@ -803,6 +803,14 @@ const Home: React.FC = () => {
                                                 </Box>
                                                 <Box>
                                                     <Typography variant="caption" className="text-gray-500">
+                                                        Country
+                                                    </Typography>
+                                                    <Typography variant="body2" className="font-medium">
+                                                        {analysisResult?.writer_info?.Country || "Not specified"}
+                                                    </Typography>
+                                                </Box>
+                                                <Box>
+                                                    <Typography variant="caption" className="text-gray-500">
                                                         Role
                                                     </Typography>
                                                     <Typography variant="body2" className="font-medium">
@@ -819,12 +827,28 @@ const Home: React.FC = () => {
                                                 </Box>
                                                 <Box>
                                                     <Typography variant="caption" className="text-gray-500">
+                                                        Birth Year
+                                                    </Typography>
+                                                    <Typography variant="body2" className="font-medium">
+                                                        {analysisResult?.writer_info?.["Birth year"] || "Not specified"}
+                                                    </Typography>
+                                                </Box>
+                                                <Box>
+                                                    <Typography variant="caption" className="text-gray-500">
+                                                        Death Year
+                                                    </Typography>
+                                                    <Typography variant="body2" className="font-medium">
+                                                        {analysisResult?.writer_info?.["Death year"] || "Not specified"}
+                                                    </Typography>
+                                                </Box>
+                                                {/* <Box>
+                                                    <Typography variant="caption" className="text-gray-500">
                                                         Unit
                                                     </Typography>
                                                     <Typography variant="body2" className="font-medium">
                                                         {analysisResult?.writer_info?.["Unit (if soldier)"] || "Not specified"}
                                                     </Typography>
-                                                </Box>
+                                                </Box> */}
                                             </Box>
                                         </Box>
                                     </Box>
@@ -837,7 +861,7 @@ const Home: React.FC = () => {
                                         <Box
                                             className="space-y-2"
                                             sx={{
-                                                maxHeight: analysisResult?.people_mentioned?.length > 5 ? '490px' : 'auto',
+                                                maxHeight: analysisResult?.people_mentioned?.length > 5 ? '455px' : 'auto',
                                                 overflowY: analysisResult?.people_mentioned?.length > 5 ? 'auto' : 'visible',
                                                 paddingRight: analysisResult?.people_mentioned?.length > 5 ? '8px' : '0'
                                             }}
