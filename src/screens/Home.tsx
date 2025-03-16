@@ -208,7 +208,7 @@ const Home: React.FC = () => {
             // Validate file type
             const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
             if (!validTypes.includes(selectedFile.type)) {
-                setUploadError('Invalid file type. Please upload PDF files only.');
+                setUploadError('Invalid file type.');
                 setSnackbarOpen(true);
                 return;
             }
