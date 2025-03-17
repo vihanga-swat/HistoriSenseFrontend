@@ -46,27 +46,27 @@ const Home: React.FC = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [analysisResult, setAnalysisResult] = useState<any>(null);
 
-    const styles = {
-        modalContent: {
-            '& .MuiDialogTitle-root': {
-                padding: '16px 24px',
-                borderBottom: '1px solid rgba(0,0,0,0.12)'
-            },
-            '& .MuiDialogContent-root': {
-                padding: '24px'
-            }
-        },
-        popupContent: {
-            margin: '8px 12px',
-            '& h3': {
-                marginBottom: '4px',
-                color: '#1f2937'
-            },
-            '& p': {
-                margin: '2px 0'
-            }
-        }
-    };
+    // const styles = {
+    //     modalContent: {
+    //         '& .MuiDialogTitle-root': {
+    //             padding: '16px 24px',
+    //             borderBottom: '1px solid rgba(0,0,0,0.12)'
+    //         },
+    //         '& .MuiDialogContent-root': {
+    //             padding: '24px'
+    //         }
+    //     },
+    //     popupContent: {
+    //         margin: '8px 12px',
+    //         '& h3': {
+    //             marginBottom: '4px',
+    //             color: '#1f2937'
+    //         },
+    //         '& p': {
+    //             margin: '2px 0'
+    //         }
+    //     }
+    // };
 
     const navigate = useNavigate();
 
@@ -80,106 +80,66 @@ const Home: React.FC = () => {
         navigate('/login', { replace: true });
     };
 
-    const events = [
-        {
-            coordinates: [51.5074, -0.1278],
-            title: 'London',
-            description: 'Starting point - Military preparation',
-            date: 'June 1, 1944'
-        },
-        {
-            coordinates: [50.8198, -1.0879],
-            title: 'Portsmouth',
-            description: 'Embarkation point for D-Day',
-            date: 'June 5, 1944'
-        },
-        {
-            coordinates: [49.3433, -0.5255],
-            title: 'Normandy',
-            description: 'D-Day landing location',
-            date: 'June 6, 1944'
-        }
-    ];
+    // const events = [
+    //     {
+    //         coordinates: [51.5074, -0.1278],
+    //         title: 'London',
+    //         description: 'Starting point - Military preparation',
+    //         date: 'June 1, 1944'
+    //     },
+    //     {
+    //         coordinates: [50.8198, -1.0879],
+    //         title: 'Portsmouth',
+    //         description: 'Embarkation point for D-Day',
+    //         date: 'June 5, 1944'
+    //     },
+    //     {
+    //         coordinates: [49.3433, -0.5255],
+    //         title: 'Normandy',
+    //         description: 'D-Day landing location',
+    //         date: 'June 6, 1944'
+    //     }
+    // ];
 
     const initializeCharts = () => {
-        if (emotionsChartRef.current) {
-            emotionsChartRef.current.destroy();
-        }
-        if (topicsChartRef.current) {
-            topicsChartRef.current.destroy();
-        }
+        if (emotionsChartRef.current) emotionsChartRef.current.destroy();
+        if (topicsChartRef.current) topicsChartRef.current.destroy();
 
         const emotionsCtx = document.getElementById('emotionsChart') as HTMLCanvasElement;
         const topicsCtx = document.getElementById('topicsChart') as HTMLCanvasElement;
 
-        if (emotionsCtx && topicsCtx) {
+        if (emotionsCtx && topicsCtx && analysisResult) {
             emotionsChartRef.current = new Chart(emotionsCtx, {
                 type: 'bar',
                 data: {
-                    labels: ['Hope', 'Anxiety', 'Pride', 'Fear', 'Relief'],
+                    labels: Object.keys(analysisResult.emotions),
                     datasets: [{
                         label: 'Emotion Intensity',
-                        data: [45, 28, 15, 8, 4],
-                        backgroundColor: [
-                            '#93c5fd',
-                            '#c084fc',
-                            '#fcd34d',
-                            '#f87171',
-                            '#86efac'
-                        ]
+                        data: Object.values(analysisResult.emotions),
+                        backgroundColor: ['#93c5fd', '#c084fc', '#fcd34d', '#f87171', '#86efac']
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        title: {
-                            display: true,
-                            text: 'Emotional Distribution'
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            title: {
-                                display: true,
-                                text: 'Intensity (%)'
-                            }
-                        }
-                    }
+                    plugins: { legend: { display: false }, title: { display: true, text: 'Emotional Distribution' } },
+                    scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: 'Intensity (%)' } } }
                 }
             });
 
             topicsChartRef.current = new Chart(topicsCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Military Operations', 'Civilian Interactions', 'War Impact', 'Daily Life', 'Combat Experience'],
+                    labels: Object.keys(analysisResult.topics),
                     datasets: [{
-                        data: [30, 25, 20, 15, 10],
-                        backgroundColor: [
-                            '#93c5fd',
-                            '#86efac',
-                            '#c084fc',
-                            '#fcd34d',
-                            '#fca5a5'
-                        ]
+                        data: Object.values(analysisResult.topics),
+                        backgroundColor: ['#93c5fd', '#86efac', '#c084fc', '#fcd34d', '#fca5a5']
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: {
-                                boxWidth: 12
-                            }
-                        }
-                    }
+                    plugins: { legend: { position: 'right', labels: { boxWidth: 12 } } }
                 }
             });
         }
@@ -204,22 +164,17 @@ const Home: React.FC = () => {
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files.length > 0) {
             const selectedFile = event.target.files[0];
-
-            // Validate file type
             const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
             if (!validTypes.includes(selectedFile.type)) {
                 setUploadError('Invalid file type.');
                 setSnackbarOpen(true);
                 return;
             }
-
-            // Validate file size (10MB max)
             if (selectedFile.size > 10 * 1024 * 1024) {
                 setUploadError('File size exceeds 10MB limit.');
                 setSnackbarOpen(true);
                 return;
             }
-
             setFile(selectedFile);
             setUploadError(null);
         }
@@ -237,47 +192,29 @@ const Home: React.FC = () => {
 
         try {
             const token = localStorage.getItem('token');
-            if (!token) {
-                throw new Error('Authentication token not found. Please log in again.');
-            }
+            if (!token) throw new Error('Authentication token not found. Please log in again.');
 
             const formData = new FormData();
-            formData.append('file', file);
+            formData.append('files', file);
 
             const response = await fetch('http://localhost:5000/api/analyze-testimony', {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
+                headers: { 'Authorization': `Bearer ${token}` },
                 body: formData,
-                credentials: 'include' // Important for cookies/session
+                credentials: 'include'
             });
 
             const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Failed to analyze testimony');
-            }
+            if (!response.ok) throw new Error(data.error || 'Failed to analyze testimony');
 
             setUploadSuccess(true);
             setSnackbarOpen(true);
             setFile(null);
-
-            // Store analysis results
             setAnalysisResult(data.analysis);
 
-            // Reset file input
-            if (fileInputRef.current) {
-                fileInputRef.current.value = '';
-            }
-
-            // Open the visualization modal with the new data
-            setTimeout(() => {
-                setVisualizationModalOpen(true);
-            }, 1000);
-
-        } catch (error) {
-            console.error('Upload error:', error);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            setTimeout(() => setVisualizationModalOpen(true), 1000);
+        } catch (error: any) {
             setUploadError(error.message || 'An error occurred during upload');
             setSnackbarOpen(true);
         } finally {
@@ -304,21 +241,13 @@ const Home: React.FC = () => {
     // }));
 
     useEffect(() => {
-        if (visualizationModalOpen) {
-            setTimeout(initializeCharts, 100);
-        }
+        if (visualizationModalOpen) setTimeout(initializeCharts, 100);
         return () => {
-            if (!localStorage.getItem('token')) {
-                navigate('/login', { replace: true });
-            }
-            if (emotionsChartRef.current) {
-                emotionsChartRef.current.destroy();
-            }
-            if (topicsChartRef.current) {
-                topicsChartRef.current.destroy();
-            }
+            if (!localStorage.getItem('token')) navigate('/login', { replace: true });
+            if (emotionsChartRef.current) emotionsChartRef.current.destroy();
+            if (topicsChartRef.current) topicsChartRef.current.destroy();
         };
-    }, [visualizationModalOpen]);
+    }, [visualizationModalOpen, analysisResult]);
 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
 
@@ -529,6 +458,7 @@ const Home: React.FC = () => {
           
         </Dialog> */}
             <Box className="max-w-7xl mx-auto px-4 py-8">
+            {analysisResult && (
                 <Box className="flex justify-end space-x-4 mb-8">
                     <Button
                         variant="contained"
@@ -547,6 +477,7 @@ const Home: React.FC = () => {
                         View Analysis Dashboard
                     </Button>
                 </Box>
+            )}
 
                 <Box className="text-center py-12">
                     <Typography variant="h6" className="text-white mb-4 font-semibold">
@@ -638,349 +569,130 @@ const Home: React.FC = () => {
             </Box>
 
             {/* Dashboard Modal */}
-            <Dialog
-                open={visualizationModalOpen}
-                onClose={() => setVisualizationModalOpen(false)}
-                maxWidth="lg"
-                fullWidth
-                sx={styles.modalContent}
-                PaperProps={{
-                    sx: {
-                        maxHeight: '90vh',
-                        margin: '32px'
-                    }
-                }}
-            >
-                <DialogTitle className="flex justify-between items-center bg-gray-50 border-b sticky top-0 z-10">
+            <Dialog open={visualizationModalOpen} onClose={() => setVisualizationModalOpen(false)} maxWidth="lg" fullWidth>
+                <DialogTitle className="flex justify-between items-center bg-gray-50 border-b">
                     <Box>
-                        <Typography
-                            variant="h6"
-                            sx={{
-                                fontSize: '1.25rem',
-                                fontWeight: 700,
-                                color: '#1f2937'
-                            }}
-                        >
-                            Analysis Dashboard
-                        </Typography>
-                        <Typography variant="body2" className="text-gray-500">
-                            World War II Memories - Personal Account
-                        </Typography>
+                        <Typography variant="h6">Analysis Dashboard</Typography>
+                        <Typography variant="body2" className="text-gray-500">{analysisResult?.title || 'Personal Account'}</Typography>
                     </Box>
-                    <IconButton onClick={() => setVisualizationModalOpen(false)}>
-                        <CloseIcon />
-                    </IconButton>
+                    <IconButton onClick={() => setVisualizationModalOpen(false)}><CloseIcon /></IconButton>
                 </DialogTitle>
-                <DialogContent className="!p-6 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 80px)' }}>
-                    <Box className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* Left Column */}
+                <DialogContent className="!p-6 overflow-y-auto">
+                    {analysisResult && (
                         <Box className="space-y-6">
-                            {/* Emotional Analysis */}
-                            <Paper
-                                sx={{
-                                    padding: '1rem',
-                                    borderRadius: '0.5rem',
-                                    border: '1px solid rgba(0,0,0,0.12)',
-                                    backgroundColor: '#ffffff'
-                                }}
-                            >
-                                <Box className="flex items-center space-x-2 mb-4">
-                                    <PsychologyIcon className="text-blue-500" />
-                                    <Typography
-                                        variant="subtitle1"
-                                        sx={{
-                                            fontSize: '1.125rem',
-                                            fontWeight: 600,
-                                            color: '#1f2937'
-                                        }}
-                                    >
-                                        Emotional Analysis
-                                    </Typography>
-                                </Box>
-                                <Box className="space-y-4">
-                                    <Box className="grid grid-cols-2 gap-4">
-                                        <Box className="text-center p-3 bg-gray-50 rounded-lg">
-                                            <Typography variant="body2" className="font-medium text-gray-800">
-                                                Primary Emotion
-                                            </Typography>
-                                            <Typography variant="h6" className="text-blue-600">
-                                                Hope
-                                            </Typography>
-                                            <Typography variant="body2" className="text-gray-500">
-                                                45%
-                                            </Typography>
+                            {/* Two-column grid for Emotional, Topics, and People */}
+                            <Box className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {/* Left Column */}
+                                <Box className="space-y-6">
+                                    <Paper sx={{ padding: '1rem' }}>
+                                        <Box className="flex items-center space-x-2 mb-4">
+                                            <PsychologyIcon className="text-blue-500" />
+                                            <Typography variant="subtitle1">Emotional Analysis</Typography>
                                         </Box>
-                                        <Box className="text-center p-3 bg-gray-50 rounded-lg">
-                                            <Typography variant="body2" className="font-medium text-gray-800">
-                                                Secondary Emotion
-                                            </Typography>
-                                            <Typography variant="h6" className="text-purple-600">
-                                                Anxiety
-                                            </Typography>
-                                            <Typography variant="body2" className="text-gray-500">
-                                                28%
-                                            </Typography>
+                                        <Box className="space-y-4">
+                                            <Box className="grid grid-cols-2 gap-4">
+                                                {Object.entries(analysisResult.emotions).slice(0, 2).map(([emotion, score], idx) => (
+                                                    <Box key={idx} className="text-center p-3 bg-gray-50 rounded-lg">
+                                                        <Typography variant="body2">{idx === 0 ? 'Primary' : 'Secondary'} Emotion</Typography>
+                                                        <Typography variant="h6" className="text-blue-600">{emotion}</Typography>
+                                                        <Typography variant="body2">{score}%</Typography>
+                                                    </Box>
+                                                ))}
+                                            </Box>
+                                            <Box className="h-[200px]"><canvas id="emotionsChart"></canvas></Box>
                                         </Box>
-                                    </Box>
-                                    <Box className="h-[200px]">
-                                        <canvas id="emotionsChart"></canvas>
-                                    </Box>
-                                </Box>
-                            </Paper>
+                                    </Paper>
 
-                            {/* Key Topics */}
-                            <Paper
-                                sx={{
-                                    padding: '1rem',
-                                    borderRadius: '0.5rem',
-                                    border: '1px solid rgba(0,0,0,0.12)',
-                                    backgroundColor: '#ffffff'
-                                }}
-                            >
-                                <Box className="flex items-center space-x-2 mb-4">
-                                    <TopicIcon className="text-green-500" />
-                                    <Typography variant="h6" className="font-semibold text-gray-800">
-                                        Key Topics
-                                    </Typography>
+                                    <Paper sx={{ padding: '1rem' }}>
+                                        <Box className="flex items-center space-x-2 mb-4">
+                                            <TopicIcon className="text-green-500" />
+                                            <Typography variant="h6">Key Topics</Typography>
+                                        </Box>
+                                        <Box className="space-y-4">
+                                            <Box className="flex flex-wrap gap-2">
+                                                {Object.keys(analysisResult.topics).map((topic, idx) => (
+                                                    <Typography key={idx} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">{topic}</Typography>
+                                                ))}
+                                            </Box>
+                                            <Box className="h-[200px]"><canvas id="topicsChart"></canvas></Box>
+                                        </Box>
+                                    </Paper>
                                 </Box>
-                                <Box className="space-y-4">
-                                    <Box className="flex flex-wrap gap-2">
-                                        <Typography className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                                            Military Operations
-                                        </Typography>
-                                        <Typography className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                                            Civilian Interactions
-                                        </Typography>
-                                        <Typography className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
-                                            War Impact
-                                        </Typography>
-                                        <Typography className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">
-                                            Daily Life
-                                        </Typography>
-                                        <Typography className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">
-                                            Combat Experience
-                                        </Typography>
-                                    </Box>
-                                    <Box className="h-[200px]">
-                                        <canvas id="topicsChart"></canvas>
-                                    </Box>
-                                </Box>
-                            </Paper>
-                        </Box>
 
-                        {/* Right Column */}
-                        <Box className="space-y-6">
-                            {/* Biographical Data */}
-                            <Paper
-                                sx={{
-                                    padding: '1rem',
-                                    borderRadius: '0.5rem',
-                                    border: '1px solid rgba(0,0,0,0.12)',
-                                    backgroundColor: '#ffffff'
-                                }}
-                            >
-                                <Box className="flex items-center space-x-2 mb-4">
-                                    <PersonIcon className="text-indigo-500" />
-                                    <Typography variant="h6" className="font-semibold text-gray-800">
-                                        People Mentioned
-                                    </Typography>
-                                </Box>
-                                <Box className="space-y-4">
-                                    {/* Writer Info */}
-                                    <Box className="border-b pb-4">
-                                        <Typography variant="body2" className="font-medium text-gray-600 mb-2">
-                                            Writer
-                                        </Typography>
-                                        <Box className="bg-gray-50 p-3 rounded-lg">
-                                            <Box className="grid grid-cols-2 gap-2">
-                                                <Box>
-                                                    <Typography variant="caption" className="text-gray-500">
-                                                        Name
-                                                    </Typography>
-                                                    <Typography variant="body2" className="font-medium">
-                                                        {analysisResult?.writer_info?.Name || "Not specified"}
-                                                    </Typography>
+                                {/* Right Column */}
+                                <Box className="space-y-6">
+                                    <Paper sx={{ padding: '1rem' }}>
+                                        <Box className="flex items-center space-x-2 mb-4">
+                                            <PersonIcon className="text-indigo-500" />
+                                            <Typography variant="h6">People Mentioned</Typography>
+                                        </Box>
+                                        <Box className="space-y-4">
+                                            <Box className="border-b pb-4">
+                                                <Typography variant="body2" className="font-medium text-gray-600 mb-2">Writer</Typography>
+                                                <Box className="bg-gray-50 p-3 rounded-lg">
+                                                    <Box className="grid grid-cols-2 gap-2">
+                                                        {['Name', 'Country', 'Role', 'Age at time', 'Birth year', 'Death year'].map(field => (
+                                                            <Box key={field}>
+                                                                <Typography variant="caption">{field}</Typography>
+                                                                <Typography variant="body2">{analysisResult.writer_info[field] || 'Not specified'}</Typography>
+                                                            </Box>
+                                                        ))}
+                                                    </Box>
                                                 </Box>
-                                                <Box>
-                                                    <Typography variant="caption" className="text-gray-500">
-                                                        Country
-                                                    </Typography>
-                                                    <Typography variant="body2" className="font-medium">
-                                                        {analysisResult?.writer_info?.Country || "Not specified"}
-                                                    </Typography>
+                                            </Box>
+                                            <Box>
+                                                <Typography variant="body2" className="font-medium text-gray-600 mb-2">Other People</Typography>
+                                                <Box className="space-y-2" sx={{ maxHeight: '455px', overflowY: 'auto' }}>
+                                                    {analysisResult.people_mentioned.length > 0 ? analysisResult.people_mentioned.map((person: any, idx: number) => (
+                                                        <Box key={idx} className="bg-gray-50 p-3 rounded-lg">
+                                                            <Box className="flex justify-between items-start">
+                                                                <Box>
+                                                                    <Typography variant="body2">{person.name !== "Unspecified" ? person.name : "Unknown Person"}</Typography>
+                                                                    <Typography variant="caption">{person.role}</Typography>
+                                                                </Box>
+                                                                <Typography variant="caption">{person.region}</Typography>
+                                                            </Box>
+                                                        </Box>
+                                                    )) : <Typography variant="body2" className="text-gray-500 italic">No other people mentioned.</Typography>}
                                                 </Box>
-                                                <Box>
-                                                    <Typography variant="caption" className="text-gray-500">
-                                                        Role
-                                                    </Typography>
-                                                    <Typography variant="body2" className="font-medium">
-                                                        {analysisResult?.writer_info?.Role || "Not specified"}
-                                                    </Typography>
-                                                </Box>
-                                                <Box>
-                                                    <Typography variant="caption" className="text-gray-500">
-                                                        Age at Time
-                                                    </Typography>
-                                                    <Typography variant="body2" className="font-medium">
-                                                        {analysisResult?.writer_info?.["Age at time"] || "Not specified"}
-                                                    </Typography>
-                                                </Box>
-                                                <Box>
-                                                    <Typography variant="caption" className="text-gray-500">
-                                                        Birth Year
-                                                    </Typography>
-                                                    <Typography variant="body2" className="font-medium">
-                                                        {analysisResult?.writer_info?.["Birth year"] || "Not specified"}
-                                                    </Typography>
-                                                </Box>
-                                                <Box>
-                                                    <Typography variant="caption" className="text-gray-500">
-                                                        Death Year
-                                                    </Typography>
-                                                    <Typography variant="body2" className="font-medium">
-                                                        {analysisResult?.writer_info?.["Death year"] || "Not specified"}
-                                                    </Typography>
-                                                </Box>
-                                                {/* <Box>
-                                                    <Typography variant="caption" className="text-gray-500">
-                                                        Unit
-                                                    </Typography>
-                                                    <Typography variant="body2" className="font-medium">
-                                                        {analysisResult?.writer_info?.["Unit (if soldier)"] || "Not specified"}
-                                                    </Typography>
-                                                </Box> */}
                                             </Box>
                                         </Box>
-                                    </Box>
+                                    </Paper>
+                                </Box>
+                            </Box>
 
-                                    {/* Other People */}
-                                    <Box>
-                                        <Typography variant="body2" className="font-medium text-gray-600 mb-2">
-                                            Other People
-                                        </Typography>
-                                        <Box
-                                            className="space-y-2"
-                                            sx={{
-                                                maxHeight: analysisResult?.people_mentioned?.length > 5 ? '455px' : 'auto',
-                                                overflowY: analysisResult?.people_mentioned?.length > 5 ? 'auto' : 'visible',
-                                                paddingRight: analysisResult?.people_mentioned?.length > 5 ? '8px' : '0'
-                                            }}
-                                        >
-                                            {analysisResult?.people_mentioned && analysisResult.people_mentioned.length > 0 ? (
-                                                analysisResult.people_mentioned.map((person, index) => (
-                                                    <Box key={index} className="bg-gray-50 p-3 rounded-lg">
-                                                        <Box className="flex justify-between items-start">
-                                                            <Box>
-                                                                <Typography variant="body2" className="font-medium">
-                                                                    {person.name !== "Unspecified" ? person.name : "Unknown Person"}
-                                                                </Typography>
-                                                                <Typography variant="caption" className="text-gray-500">
-                                                                    {person.role !== "Unspecified" ? person.role : "Unknown role"}
-                                                                </Typography>
-                                                            </Box>
-                                                            <Typography variant="caption" className="text-gray-500">
-                                                                {person.region !== "Unspecified" ? person.region : "Unknown location"}
-                                                            </Typography>
-                                                        </Box>
-                                                    </Box>
-                                                ))
-                                            ) : (
-                                                <Typography variant="body2" className="text-gray-500 italic">
-                                                    No other people specifically mentioned in the testimony.
-                                                </Typography>
-                                            )}
-                                        </Box>
+                            {/* Full-width Geographical Data */}
+                            <Paper sx={{ padding: '1rem' }}>
+                                <Box className="flex items-center justify-between mb-4">
+                                    <Box className="flex items-center space-x-2">
+                                        <PublicIcon className="text-red-500" />
+                                        <Typography variant="h6">Geographical Data</Typography>
                                     </Box>
+                                    <Box className="flex space-x-2">
+                                        <Button variant="contained" size="small" onClick={() => setShowEvents(!showEvents)} className={showEvents ? 'bg-blue-100 text-blue-800' : 'bg-gray-100'}>Events</Button>
+                                        <Button variant="contained" size="small" onClick={() => setShowMovements(!showMovements)} className={showMovements ? 'bg-green-100 text-green-800' : 'bg-gray-100'}>Movements</Button>
+                                    </Box>
+                                </Box>
+                                <Box className="h-[400px] rounded-lg">
+                                    <MapContainer center={[51.5074, -0.1278]} zoom={5} className="h-full w-full">
+                                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='© OpenStreetMap contributors' />
+                                        {showEvents && Object.entries(analysisResult.locations).map(([location, data]: [string, any], idx) => (
+                                            <CircleMarker key={idx} center={[51.5074 + idx * 0.1, -0.1278 + idx * 0.1]} radius={8} fillColor="#4f46e5" color="#fff" weight={2} opacity={1} fillOpacity={0.8}>
+                                                <Popup>
+                                                    <Typography variant="subtitle2">{location}</Typography>
+                                                    <Typography variant="body2">{data.description}</Typography>
+                                                    <Typography variant="caption">{data.count} mention(s)</Typography>
+                                                </Popup>
+                                            </CircleMarker>
+                                        ))}
+                                        {showMovements && Object.keys(analysisResult.locations).length > 1 && (
+                                            <Polyline positions={Object.keys(analysisResult.locations).map((_, idx) => [51.5074 + idx * 0.1, -0.1278 + idx * 0.1])} color="#10b981" weight={2} dashArray="5, 5" opacity={0.8} />
+                                        )}
+                                    </MapContainer>
                                 </Box>
                             </Paper>
                         </Box>
-                    </Box>
-
-                    <Box className="mt-6">
-                        {/* Geographical Data */}
-                        <Paper
-                            sx={{
-                                padding: '1rem',
-                                borderRadius: '0.5rem',
-                                border: '1px solid rgba(0,0,0,0.12)',
-                                backgroundColor: '#ffffff'
-                            }}
-                        >
-                            <Box className="flex items-center justify-between mb-4">
-                                <Box className="flex items-center space-x-2">
-                                    <PublicIcon className="text-red-500" />
-                                    <Typography variant="h6" className="font-semibold text-gray-800">
-                                        Geographical Data
-                                    </Typography>
-                                </Box>
-                                <Box className="flex space-x-2">
-                                    <Button
-                                        variant="contained"
-                                        size="small"
-                                        onClick={() => setShowEvents(!showEvents)}
-                                        className={`${showEvents ? 'bg-blue-100 text-blue-800' : 'bg-gray-100'
-                                            } hover:bg-blue-200`}
-                                    >
-                                        Events
-                                    </Button>
-                                    <Button
-                                        variant="contained"
-                                        size="small"
-                                        onClick={() => setShowMovements(!showMovements)}
-                                        className={`${showMovements ? 'bg-green-100 text-green-800' : 'bg-gray-100'
-                                            } hover:bg-green-200`}
-                                    >
-                                        Movements
-                                    </Button>
-                                </Box>
-                            </Box>
-                            <Box className="h-[300px] rounded-lg">
-                                <MapContainer
-                                    center={[51.5074, -0.1278]}
-                                    zoom={5}
-                                    className="h-full w-full"
-                                >
-                                    <TileLayer
-                                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                        attribution='© OpenStreetMap contributors'
-                                    />
-                                    {showEvents && events.map((event, index) => (
-                                        <CircleMarker
-                                            key={index}
-                                            center={event.coordinates}
-                                            radius={8}
-                                            fillColor="#4f46e5"
-                                            color="#fff"
-                                            weight={2}
-                                            opacity={1}
-                                            fillOpacity={0.8}
-                                        >
-                                            <Popup>
-                                                <Typography variant="subtitle2" className="font-semibold">
-                                                    {event.title}
-                                                </Typography>
-                                                <Typography variant="body2" className="text-gray-600">
-                                                    {event.description}
-                                                </Typography>
-                                                <Typography variant="caption" className="text-gray-500">
-                                                    {event.date}
-                                                </Typography>
-                                            </Popup>
-                                        </CircleMarker>
-                                    ))}
-                                    {showMovements && (
-                                        <Polyline
-                                            positions={events.map(event => event.coordinates)}
-                                            color="#10b981"
-                                            weight={2}
-                                            dashArray="5, 5"
-                                            opacity={0.8}
-                                        />
-                                    )}
-                                </MapContainer>
-                            </Box>
-                        </Paper>
-                    </Box>
+                    )}
                 </DialogContent>
             </Dialog>
             <Snackbar
