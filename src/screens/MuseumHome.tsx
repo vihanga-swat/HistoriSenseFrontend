@@ -73,29 +73,29 @@ const MHome: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const userRole = localStorage.getItem('role') || 'museum';
+  // const userRole = localStorage.getItem('role') || 'museum';
 
-  const styles = {
-    modalContent: {
-      '& .MuiDialogTitle-root': {
-        padding: '16px 24px',
-        borderBottom: '1px solid rgba(0,0,0,0.12)'
-      },
-      '& .MuiDialogContent-root': {
-        padding: '24px'
-      }
-    },
-    popupContent: {
-      margin: '8px 12px',
-      '& h3': {
-        marginBottom: '4px',
-        color: '#1f2937'
-      },
-      '& p': {
-        margin: '2px 0'
-      }
-    }
-  };
+  // const styles = {
+  //   modalContent: {
+  //     '& .MuiDialogTitle-root': {
+  //       padding: '16px 24px',
+  //       borderBottom: '1px solid rgba(0,0,0,0.12)'
+  //     },
+  //     '& .MuiDialogContent-root': {
+  //       padding: '24px'
+  //     }
+  //   },
+  //   popupContent: {
+  //     margin: '8px 12px',
+  //     '& h3': {
+  //       marginBottom: '4px',
+  //       color: '#1f2937'
+  //     },
+  //     '& p': {
+  //       margin: '2px 0'
+  //     }
+  //   }
+  // };
 
   // const testimonies = [
   //   {
@@ -554,7 +554,7 @@ const MHome: React.FC = () => {
         <DialogContent className="!p-6">
           <Box className="space-y-4 mt-4">
             <Typography variant="body2" className="text-gray-600">
-              Upload up to 5 files
+              Maximum analyze 5 files
             </Typography>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -592,18 +592,18 @@ const MHome: React.FC = () => {
                         <DeleteIcon />
                       </IconButton>
                     </Box>
-                    <TextField
+                    {/* <TextField
                       fullWidth
                       label={`Title for ${file.name}`}
                       variant="outlined"
                       id={`title_${index}`}
                       defaultValue={file.name}
-                    />
-                    <TextareaAutosize
+                    /> */}
+                    {/* <TextareaAutosize
                       className="w-full p-3 border rounded-md min-h-[100px]"
                       placeholder={`Description for ${file.name}`}
                       id={`description_${index}`}
-                    />
+                    /> */}
                   </Box>
                 ))}
               </Box>
@@ -633,129 +633,129 @@ const MHome: React.FC = () => {
 
       {/* Visualization Modal */}
       <Dialog open={visualizationModalOpen} onClose={() => setVisualizationModalOpen(false)} maxWidth="lg" fullWidth>
-                <DialogTitle className="flex justify-between items-center bg-gray-50 border-b">
-                    <Box>
-                        <Typography variant="h6">{selectedTestimony?.title || 'Analysis Dashboard'}</Typography>
-                        <Typography variant="body2">{selectedTestimony?.description || 'Testimony Analysis'}</Typography>
+        <DialogTitle className="flex justify-between items-center bg-gray-50 border-b">
+          <Box>
+            <Typography variant="h6">{selectedTestimony?.title || 'Analysis Dashboard'}</Typography>
+            <Typography variant="body2">{selectedTestimony?.description || 'Testimony Analysis'}</Typography>
+          </Box>
+          <IconButton onClick={() => setVisualizationModalOpen(false)}><CloseIcon /></IconButton>
+        </DialogTitle>
+        <DialogContent className="!p-6 overflow-y-auto">
+          {selectedTestimony && (
+            <Box className="space-y-6">
+              {/* Two-column grid for Emotional, Topics, and People */}
+              <Box className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Box className="space-y-6">
+                  <Paper sx={{ padding: '1rem' }}>
+                    <Box className="flex items-center space-x-2 mb-4">
+                      <PsychologyIcon className="text-blue-500" />
+                      <Typography variant="subtitle1">Emotional Analysis</Typography>
                     </Box>
-                    <IconButton onClick={() => setVisualizationModalOpen(false)}><CloseIcon /></IconButton>
-                </DialogTitle>
-                <DialogContent className="!p-6 overflow-y-auto">
-                    {selectedTestimony && (
-                        <Box className="space-y-6">
-                            {/* Two-column grid for Emotional, Topics, and People */}
-                            <Box className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                <Box className="space-y-6">
-                                    <Paper sx={{ padding: '1rem' }}>
-                                        <Box className="flex items-center space-x-2 mb-4">
-                                            <PsychologyIcon className="text-blue-500" />
-                                            <Typography variant="subtitle1">Emotional Analysis</Typography>
-                                        </Box>
-                                        <Box className="space-y-4">
-                                            <Box className="grid grid-cols-2 gap-4">
-                                                {Object.entries(selectedTestimony.emotions).slice(0, 2).map(([emotion, score], idx) => (
-                                                    <Box key={idx} className="text-center p-3 bg-gray-50 rounded-lg">
-                                                        <Typography variant="body2">{idx === 0 ? 'Primary' : 'Secondary'} Emotion</Typography>
-                                                        <Typography variant="h6">{emotion}</Typography>
-                                                        <Typography variant="body2">{score}%</Typography>
-                                                    </Box>
-                                                ))}
-                                            </Box>
-                                            <Box className="h-[200px]"><canvas id="emotionsChart"></canvas></Box>
-                                        </Box>
-                                    </Paper>
+                    <Box className="space-y-4">
+                      <Box className="grid grid-cols-2 gap-4">
+                        {Object.entries(selectedTestimony.emotions).slice(0, 2).map(([emotion, score], idx) => (
+                          <Box key={idx} className="text-center p-3 bg-gray-50 rounded-lg">
+                            <Typography variant="body2">{idx === 0 ? 'Primary' : 'Secondary'} Emotion</Typography>
+                            <Typography variant="h6">{emotion}</Typography>
+                            <Typography variant="body2">{score}%</Typography>
+                          </Box>
+                        ))}
+                      </Box>
+                      <Box className="h-[200px]"><canvas id="emotionsChart"></canvas></Box>
+                    </Box>
+                  </Paper>
 
-                                    <Paper sx={{ padding: '1rem' }}>
-                                        <Box className="flex items-center space-x-2 mb-4">
-                                            <TopicIcon className="text-green-500" />
-                                            <Typography variant="h6">Key Topics</Typography>
-                                        </Box>
-                                        <Box className="space-y-4">
-                                            <Box className="flex flex-wrap gap-2">
-                                                {Object.keys(selectedTestimony.topics).map((topic, idx) => (
-                                                    <Typography key={idx} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">{topic}</Typography>
-                                                ))}
-                                            </Box>
-                                            <Box className="h-[200px]"><canvas id="topicsChart"></canvas></Box>
-                                        </Box>
-                                    </Paper>
-                                </Box>
+                  <Paper sx={{ padding: '1rem' }}>
+                    <Box className="flex items-center space-x-2 mb-4">
+                      <TopicIcon className="text-green-500" />
+                      <Typography variant="h6">Key Topics</Typography>
+                    </Box>
+                    <Box className="space-y-4">
+                      <Box className="flex flex-wrap gap-2">
+                        {Object.keys(selectedTestimony.topics).map((topic, idx) => (
+                          <Typography key={idx} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">{topic}</Typography>
+                        ))}
+                      </Box>
+                      <Box className="h-[200px]"><canvas id="topicsChart"></canvas></Box>
+                    </Box>
+                  </Paper>
+                </Box>
 
-                                <Box className="space-y-6">
-                                    <Paper sx={{ padding: '1rem' }}>
-                                        <Box className="flex items-center space-x-2 mb-4">
-                                            <PersonIcon className="text-indigo-500" />
-                                            <Typography variant="h6">People Mentioned</Typography>
-                                        </Box>
-                                        <Box className="space-y-4">
-                                            <Box className="border-b pb-4">
-                                                <Typography variant="body2" className="font-medium text-gray-600 mb-2">Writer</Typography>
-                                                <Box className="bg-gray-50 p-3 rounded-lg">
-                                                    <Box className="grid grid-cols-2 gap-2">
-                                                        {['Name', 'Country', 'Role', 'Age at time', 'Birth year', 'Death year'].map(field => (
-                                                            <Box key={field}>
-                                                                <Typography variant="caption">{field}</Typography>
-                                                                <Typography variant="body2">{selectedTestimony.writer_info[field] || 'Not specified'}</Typography>
-                                                            </Box>
-                                                        ))}
-                                                    </Box>
-                                                </Box>
-                                            </Box>
-                                            <Box>
-                                                <Typography variant="body2" className="font-medium text-gray-600 mb-2">Other People</Typography>
-                                                <Box className="space-y-2" sx={{ maxHeight: '455px', overflowY: 'auto' }}>
-                                                    {selectedTestimony.people_mentioned.length > 0 ? selectedTestimony.people_mentioned.map((person: any, idx: number) => (
-                                                        <Box key={idx} className="bg-gray-50 p-3 rounded-lg">
-                                                            <Box className="flex justify-between items-start">
-                                                                <Box>
-                                                                    <Typography variant="body2">{person.name !== "Unspecified" ? person.name : "Unknown Person"}</Typography>
-                                                                    <Typography variant="caption">{person.role}</Typography>
-                                                                </Box>
-                                                                <Typography variant="caption">{person.region}</Typography>
-                                                            </Box>
-                                                        </Box>
-                                                    )) : <Typography variant="body2" className="text-gray-500 italic">No other people mentioned.</Typography>}
-                                                </Box>
-                                            </Box>
-                                        </Box>
-                                    </Paper>
-                                </Box>
-                            </Box>
-
-                            {/* Full-width Geographical Data */}
-                            <Paper sx={{ padding: '1rem' }}>
-                                <Box className="flex items-center justify-between mb-4">
-                                    <Box className="flex items-center space-x-2">
-                                        <PublicIcon className="text-red-500" />
-                                        <Typography variant="h6">Geographical Data</Typography>
-                                    </Box>
-                                    <Box className="flex space-x-2">
-                                        <Button variant="contained" size="small" onClick={() => setShowEvents(!showEvents)} className={showEvents ? 'bg-blue-100 text-blue-800' : 'bg-gray-100'}>Events</Button>
-                                        <Button variant="contained" size="small" onClick={() => setShowMovements(!showMovements)} className={showMovements ? 'bg-green-100 text-green-800' : 'bg-gray-100'}>Movements</Button>
-                                    </Box>
-                                </Box>
-                                <Box className="h-[400px] rounded-lg">
-                                    <MapContainer center={[51.5074, -0.1278]} zoom={5} className="h-full w-full">
-                                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='© OpenStreetMap contributors' />
-                                        {showEvents && Object.entries(selectedTestimony.locations).map(([location, data]: [string, any], idx) => (
-                                            <CircleMarker key={idx} center={[51.5074 + idx * 0.1, -0.1278 + idx * 0.1]} radius={8} fillColor="#4f46e5" color="#fff" weight={2} opacity={1} fillOpacity={0.8}>
-                                                <Popup>
-                                                    <Typography variant="subtitle2">{location}</Typography>
-                                                    <Typography variant="body2">{data.description}</Typography>
-                                                    <Typography variant="caption">{data.count} mention(s)</Typography>
-                                                </Popup>
-                                            </CircleMarker>
-                                        ))}
-                                        {showMovements && Object.keys(selectedTestimony.locations).length > 1 && (
-                                            <Polyline positions={Object.keys(selectedTestimony.locations).map((_, idx) => [51.5074 + idx * 0.1, -0.1278 + idx * 0.1])} color="#10b981" weight={2} dashArray="5, 5" opacity={0.8} />
-                                        )}
-                                    </MapContainer>
-                                </Box>
-                            </Paper>
+                <Box className="space-y-6">
+                  <Paper sx={{ padding: '1rem' }}>
+                    <Box className="flex items-center space-x-2 mb-4">
+                      <PersonIcon className="text-indigo-500" />
+                      <Typography variant="h6">People Mentioned</Typography>
+                    </Box>
+                    <Box className="space-y-4">
+                      <Box className="border-b pb-4">
+                        <Typography variant="body2" className="font-medium text-gray-600 mb-2">Writer</Typography>
+                        <Box className="bg-gray-50 p-3 rounded-lg">
+                          <Box className="grid grid-cols-2 gap-2">
+                            {['Name', 'Country', 'Role', 'Age at time', 'Birth year', 'Death year'].map(field => (
+                              <Box key={field}>
+                                <Typography variant="caption">{field}</Typography>
+                                <Typography variant="body2">{selectedTestimony.writer_info[field] || 'Not specified'}</Typography>
+                              </Box>
+                            ))}
+                          </Box>
                         </Box>
+                      </Box>
+                      <Box>
+                        <Typography variant="body2" className="font-medium text-gray-600 mb-2">Other People</Typography>
+                        <Box className="space-y-2" sx={{ maxHeight: '455px', overflowY: 'auto' }}>
+                          {selectedTestimony.people_mentioned.length > 0 ? selectedTestimony.people_mentioned.map((person: any, idx: number) => (
+                            <Box key={idx} className="bg-gray-50 p-3 rounded-lg">
+                              <Box className="flex justify-between items-start">
+                                <Box>
+                                  <Typography variant="body2">{person.name !== "Unspecified" ? person.name : "Unknown Person"}</Typography>
+                                  <Typography variant="caption">{person.role}</Typography>
+                                </Box>
+                                <Typography variant="caption">{person.region}</Typography>
+                              </Box>
+                            </Box>
+                          )) : <Typography variant="body2" className="text-gray-500 italic">No other people mentioned.</Typography>}
+                        </Box>
+                      </Box>
+                    </Box>
+                  </Paper>
+                </Box>
+              </Box>
+
+              {/* Full-width Geographical Data */}
+              <Paper sx={{ padding: '1rem' }}>
+                <Box className="flex items-center justify-between mb-4">
+                  <Box className="flex items-center space-x-2">
+                    <PublicIcon className="text-red-500" />
+                    <Typography variant="h6">Geographical Data</Typography>
+                  </Box>
+                  <Box className="flex space-x-2">
+                    <Button variant="contained" size="small" onClick={() => setShowEvents(!showEvents)} className={showEvents ? 'bg-blue-100 text-blue-800' : 'bg-gray-100'}>Events</Button>
+                    <Button variant="contained" size="small" onClick={() => setShowMovements(!showMovements)} className={showMovements ? 'bg-green-100 text-green-800' : 'bg-gray-100'}>Movements</Button>
+                  </Box>
+                </Box>
+                <Box className="h-[400px] rounded-lg">
+                  <MapContainer center={[51.5074, -0.1278]} zoom={5} className="h-full w-full">
+                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='© OpenStreetMap contributors' />
+                    {showEvents && Object.entries(selectedTestimony.locations).map(([location, data]: [string, any], idx) => (
+                      <CircleMarker key={idx} center={[51.5074 + idx * 0.1, -0.1278 + idx * 0.1]} radius={8} fillColor="#4f46e5" color="#fff" weight={2} opacity={1} fillOpacity={0.8}>
+                        <Popup>
+                          <Typography variant="subtitle2">{location}</Typography>
+                          <Typography variant="body2">{data.description}</Typography>
+                          <Typography variant="caption">{data.count} mention(s)</Typography>
+                        </Popup>
+                      </CircleMarker>
+                    ))}
+                    {showMovements && Object.keys(selectedTestimony.locations).length > 1 && (
+                      <Polyline positions={Object.keys(selectedTestimony.locations).map((_, idx) => [51.5074 + idx * 0.1, -0.1278 + idx * 0.1])} color="#10b981" weight={2} dashArray="5, 5" opacity={0.8} />
                     )}
-                </DialogContent>
-            </Dialog>
+                  </MapContainer>
+                </Box>
+              </Paper>
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={6000}

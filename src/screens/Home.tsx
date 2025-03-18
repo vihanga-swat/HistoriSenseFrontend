@@ -595,10 +595,9 @@ const Home: React.FC = () => {
                                                     <Box key={idx} className="text-center p-3 bg-gray-50 rounded-lg">
                                                         <Typography variant="body2">{idx === 0 ? 'Primary' : 'Secondary'} Emotion</Typography>
                                                         <Typography variant="h6" className="text-blue-600">{emotion}</Typography>
-                                                        <Typography variant="body2">{score}%</Typography>
+                                                        <Typography variant="body2">{String(score)}%</Typography>
                                                     </Box>
-                                                ))}
-                                            </Box>
+                                                ))}                                            </Box>
                                             <Box className="h-[200px]"><canvas id="emotionsChart"></canvas></Box>
                                         </Box>
                                     </Paper>
