@@ -11,8 +11,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  TextField,
-  TextareaAutosize,
   Box,
   Paper,
   CircularProgress,
@@ -73,63 +71,43 @@ const MHome: React.FC = () => {
 
   const navigate = useNavigate();
 
-  // const userRole = localStorage.getItem('role') || 'museum';
+  const isTokenExpired = (token: string | null): boolean => {
+    if (!token) return true;
+    
+    try {
+      // Get payload from JWT token
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      // Check if token is expired
+      return payload.exp < Date.now() / 1000;
+    } catch (error) {
+      return true;
+    }
+  };
 
-  // const styles = {
-  //   modalContent: {
-  //     '& .MuiDialogTitle-root': {
-  //       padding: '16px 24px',
-  //       borderBottom: '1px solid rgba(0,0,0,0.12)'
-  //     },
-  //     '& .MuiDialogContent-root': {
-  //       padding: '24px'
-  //     }
-  //   },
-  //   popupContent: {
-  //     margin: '8px 12px',
-  //     '& h3': {
-  //       marginBottom: '4px',
-  //       color: '#1f2937'
-  //     },
-  //     '& p': {
-  //       margin: '2px 0'
-  //     }
-  //   }
-  // };
-
-  // const testimonies = [
-  //   {
-  //     title: 'World War II Memoir',
-  //     uploadDate: 'Feb 10, 2024',
-  //     fileType: '.pdf'
-  //   },
-  //   {
-  //     title: 'Family Migration Story',
-  //     uploadDate: 'Feb 8, 2024',
-  //     fileType: '.docx'
-  //   }
-  // ];
-
-  // const events = [
-  //   {
-  //     coordinates: [51.5074, -0.1278],
-  //     title: 'London',
-  //     description: 'Starting point - Military preparation',
-  //     date: 'June 1, 1944'
-  //   },
-  //   {
-  //     coordinates: [50.8198, -1.0879],
-  //     title: 'Portsmouth',
-  //     description: 'Embarkation point for D-Day',
-  //     date: 'June 5, 1944'
-  //   },
-  //   {
-  //     coordinates: [49.3433, -0.5255],
-  //     title: 'Normandy',
-  //     description: 'D-Day landing location',
-  //     date: 'June 6, 1944'
-  //   }
-  // ];
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    // Check if token is expired on component mount
+    if (!token || isTokenExpired(token)) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      navigate('/login', { replace: true });
+      return;
+    }
+    // Set up periodic token expiration check
+    const checkTokenInterval = setInterval(() => {
+      const currentToken = localStorage.getItem('token');
+      if (!currentToken || isTokenExpired(currentToken)) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/login', { replace: true });
+        clearInterval(checkTokenInterval);
+      }
+    }, 30000); // Check every 30 seconds
+    // Clean up on component unmount
+    return () => {
+      clearInterval(checkTokenInterval);
+    };
+  }, [navigate]);
 
   const UploadContainer = styled(Box)(({ theme }) => ({
     background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%)',
@@ -149,7 +127,26 @@ const MHome: React.FC = () => {
 
   const fetchTestimonies = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/museum-testimonies', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+      const token = localStorage.getItem('token');
+      if (!token || isTokenExpired(token)) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/login', { replace: true });
+        return;
+      }
+
+      const response = await fetch('http://localhost:5000/api/museum-testimonies', { 
+        headers: { 'Authorization': `Bearer ${token}` } 
+      });
+      
+      // Handle 401 Unauthorized response
+      if (response.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/login', { replace: true });
+        return;
+      }
+      
       const data = await response.json();
       setTestimonies(data.testimonies || []);
     } catch (error) {
@@ -196,6 +193,13 @@ const MHome: React.FC = () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Authentication token not found.');
+      
+      if (isTokenExpired(token)) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/login', { replace: true });
+        throw new Error('Your session has expired. Please log in again.');
+      }
 
       const formData = new FormData();
       files.forEach((file, index) => {
@@ -206,7 +210,20 @@ const MHome: React.FC = () => {
         formData.append(`description_${file.name}`, descriptionInput?.value || '');
       });
 
-      const response = await fetch('http://localhost:5000/api/analyze-testimony', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
+      const response = await fetch('http://localhost:5000/api/analyze-testimony', { 
+        method: 'POST', 
+        headers: { 'Authorization': `Bearer ${token}` }, 
+        body: formData 
+      });
+      
+      // Handle 401 Unauthorized response
+      if (response.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/login', { replace: true });
+        throw new Error('Your session has expired. Please log in again.');
+      }
+
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Failed to analyze testimonies');
 
@@ -226,7 +243,26 @@ const MHome: React.FC = () => {
 
   const viewTestimony = async (filename: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/museum-testimony/${filename}`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+      const token = localStorage.getItem('token');
+      if (!token || isTokenExpired(token)) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/login', { replace: true });
+        return;
+      }
+
+      const response = await fetch(`http://localhost:5000/api/museum-testimony/${filename}`, { 
+        headers: { 'Authorization': `Bearer ${token}` } 
+      });
+      
+      // Handle 401 Unauthorized response
+      if (response.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/login', { replace: true });
+        return;
+      }
+      
       const data = await response.json();
       setSelectedTestimony(data.testimony);
       setVisualizationModalOpen(true);
@@ -309,6 +345,13 @@ const MHome: React.FC = () => {
       if (!token) {
         throw new Error('Authentication token not found. Please log in again.');
       }
+      
+      if (isTokenExpired(token)) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/login', { replace: true });
+        throw new Error('Your session has expired. Please log in again.');
+      }
 
       const response = await fetch(`http://localhost:5000/api/museum-testimony/${testimonyToDelete}`, {
         method: 'DELETE',
@@ -316,6 +359,14 @@ const MHome: React.FC = () => {
           'Authorization': `Bearer ${token}`,
         },
       });
+      
+      // Handle 401 Unauthorized response
+      if (response.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/login', { replace: true });
+        throw new Error('Your session has expired. Please log in again.');
+      }
 
       const data: { message: string } = await response.json();
       if (!response.ok) {
@@ -477,7 +528,7 @@ const MHome: React.FC = () => {
             </Box>
             <Box className="flex items-center space-x-4">
               <Typography className="text-gray-700">
-                Welcome, {user.name || 'User'} {/* Assuming the user's name is stored under 'name' */}
+                Welcome, {user.name || 'User'} {/* Display user's name */}
               </Typography>
               <IconButton
                 onClick={handleLogout}
@@ -592,18 +643,6 @@ const MHome: React.FC = () => {
                         <DeleteIcon />
                       </IconButton>
                     </Box>
-                    {/* <TextField
-                      fullWidth
-                      label={`Title for ${file.name}`}
-                      variant="outlined"
-                      id={`title_${index}`}
-                      defaultValue={file.name}
-                    /> */}
-                    {/* <TextareaAutosize
-                      className="w-full p-3 border rounded-md min-h-[100px]"
-                      placeholder={`Description for ${file.name}`}
-                      id={`description_${index}`}
-                    /> */}
                   </Box>
                 ))}
               </Box>
@@ -722,7 +761,7 @@ const MHome: React.FC = () => {
                 </Box>
               </Box>
 
-              {/* Full-width Geographical Data */}
+              {/* Geographical Data */}
               <Paper sx={{ padding: '1rem' }}>
                 <Box className="flex items-center justify-between mb-4">
                   <Box className="flex items-center space-x-2">

@@ -46,28 +46,6 @@ const Home: React.FC = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [analysisResult, setAnalysisResult] = useState<any>(null);
 
-    // const styles = {
-    //     modalContent: {
-    //         '& .MuiDialogTitle-root': {
-    //             padding: '16px 24px',
-    //             borderBottom: '1px solid rgba(0,0,0,0.12)'
-    //         },
-    //         '& .MuiDialogContent-root': {
-    //             padding: '24px'
-    //         }
-    //     },
-    //     popupContent: {
-    //         margin: '8px 12px',
-    //         '& h3': {
-    //             marginBottom: '4px',
-    //             color: '#1f2937'
-    //         },
-    //         '& p': {
-    //             margin: '2px 0'
-    //         }
-    //     }
-    // };
-
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -79,27 +57,6 @@ const Home: React.FC = () => {
         setLogoutConfirmOpen(false);
         navigate('/login', { replace: true });
     };
-
-    // const events = [
-    //     {
-    //         coordinates: [51.5074, -0.1278],
-    //         title: 'London',
-    //         description: 'Starting point - Military preparation',
-    //         date: 'June 1, 1944'
-    //     },
-    //     {
-    //         coordinates: [50.8198, -1.0879],
-    //         title: 'Portsmouth',
-    //         description: 'Embarkation point for D-Day',
-    //         date: 'June 5, 1944'
-    //     },
-    //     {
-    //         coordinates: [49.3433, -0.5255],
-    //         title: 'Normandy',
-    //         description: 'D-Day landing location',
-    //         date: 'June 6, 1944'
-    //     }
-    // ];
 
     const initializeCharts = () => {
         if (emotionsChartRef.current) emotionsChartRef.current.destroy();
@@ -194,6 +151,23 @@ const Home: React.FC = () => {
             const token = localStorage.getItem('token');
             if (!token) throw new Error('Authentication token not found. Please log in again.');
 
+            // Check if token is expired
+            const isTokenExpired = (token: string): boolean => {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    return payload.exp < Date.now() / 1000;
+                } catch (error) {
+                    return true;
+                }
+            };
+
+            if (isTokenExpired(token)) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                navigate('/login', { replace: true });
+                throw new Error('Your session has expired. Please log in again.');
+            }
+
             const formData = new FormData();
             formData.append('files', file);
 
@@ -203,6 +177,13 @@ const Home: React.FC = () => {
                 body: formData,
                 credentials: 'include'
             });
+
+            if (response.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                navigate('/login', { replace: true });
+                throw new Error('Your session has expired. Please log in again.');
+              }
 
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'Failed to analyze testimony');
@@ -226,19 +207,42 @@ const Home: React.FC = () => {
         setSnackbarOpen(false);
     };
 
-    // const UploadButton = styled(Button)(({ theme }) => ({
-    //     backgroundColor: '#4f46e5',
-    //     color: 'white',
-    //     padding: '0.75rem 2rem',
-    //     borderRadius: '8px',
-    //     textTransform: 'none',
-    //     fontWeight: 600,
-    //     '&:hover': {
-    //         backgroundColor: '#4338ca',
-    //         transform: 'translateY(-2px)',
-    //     },
-    //     transition: 'all 0.2s ease',
-    // }));
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        // check if token is expired
+        const isTokenExpired = (token: string | null): boolean => {
+            if (!token) return true;
+            try {
+                // Get payload from JWT token
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                // Check if token is expired
+                return payload.exp < Date.now() / 1000;
+            } catch (error) {
+                return true;
+            }
+        };
+        // Check if token is expired on component mount
+        if (!token || isTokenExpired(token)) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            navigate('/login', { replace: true });
+            return;
+        }
+        // Set up periodic token expiration check
+        const checkTokenInterval = setInterval(() => {
+            const currentToken = localStorage.getItem('token');
+            if (!currentToken || isTokenExpired(currentToken)) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                navigate('/login', { replace: true });
+                clearInterval(checkTokenInterval);
+            }
+        }, 30000); // Check every 30 seconds
+        // Clean up on component unmount
+        return () => {
+            clearInterval(checkTokenInterval);
+        };
+    }, [navigate]);
 
     useEffect(() => {
         if (visualizationModalOpen) setTimeout(initializeCharts, 100);
@@ -347,145 +351,32 @@ const Home: React.FC = () => {
                 </Box>
             </Box>
 
-            {/* Main Content */}
-            {/* <Box className="max-w-7xl mx-auto px-4 py-8"> */}
-            {/* <Typography variant="h4" className="font-bold text-gray-800">
-              War Testimony Analysis
-            </Typography> */}
-            {/* <Box className="space-x-4">
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => setUploadModalOpen(true)}
-                sx={{
-                  backgroundColor: '#4f46e5',
-                  '&:hover': {
-                    backgroundColor: '#4338ca'
-                  },
-                  textTransform: 'none',
-                  borderRadius: '0.5rem',
-                  padding: '0.5rem 1rem'
-                }}
-              >
-                Upload War Testimony
-              </Button>
-              <Button
-                variant="outlined"
-                startIcon={<VisibilityIcon />}
-                onClick={() => setVisualizationModalOpen(true)}
-                sx={{
-                    backgroundColor: '#4f46e5',
-                    '&:hover': {
-                      backgroundColor: '#4338ca'
-                    },
-                    textTransform: 'none',
-                    borderRadius: '0.5rem',
-                    padding: '0.5rem 1rem'
-                  }}
-              >
-                View Analysis Dashboard
-              </Button>
-            </Box> */}
-
-            {/* <Box className="flex justify-end space-x-4 mb-8">
-                    <Button
-                        variant="contained"
-                        startIcon={<VisibilityIcon />}
-                        onClick={() => setVisualizationModalOpen(true)}
-                        sx={{
-                            backgroundColor: '#4f46e5',
-                            '&:hover': {
-                                backgroundColor: '#4338ca'
-                            },
-                            textTransform: 'none',
-                            borderRadius: '0.5rem',
-                            padding: '0.5rem 1rem'
-                        }}
-                    >
-                        View Analysis Dashboard
-                    </Button>
-                </Box>
-
-                <Box className="text-center py-12">
-                    <Typography variant="h6" className="text-gray-600 mb-4">
-                        Contribute to War History Analysis
-                    </Typography>
-                    <Typography variant="body1" className="text-gray-500">
-                        Upload historical war testimonies for analysis and preservation
-                    </Typography>
-                </Box>
-
-                <Box className="flex justify-center mt-8">
-
-                    <DialogContent className="!p-6">
-                        <Box className="space-y-4 mt-4">
-                            <Box className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
-                                <CloudUploadIcon className="text-gray-400 text-4xl mb-2" />
-                                <Typography variant="body2" className="text-gray-600">
-                                    Upload war testimony file or drag and drop
-                                </Typography>
-                                <Typography variant="caption" className="text-gray-500">
-                                    PDF, DOC, DOCX, TXT up to 10MB
-                                </Typography>
-                                <input type="file" className="hidden" accept=".pdf,.doc,.docx,.txt" />
-                            </Box>
-                            <Box className="flex justify-end space-x-2"> */}
-            {/* <Button
-                  onClick={() => setUploadModalOpen(false)}
-                  className="text-gray-700 hover:bg-gray-50"
-                >
-                  Cancel
-                </Button> */}
-            {/* <Button
-                                    variant="contained"
-                                    className="bg-indigo-600 hover:bg-indigo-700"
-                                >
-                                    Upload
-                                </Button>
-                            </Box>
-                        </Box>
-                    </DialogContent>
-                </Box>
-            </Box> */}
-
-            {/* Upload Modal */}
-            {/* <Dialog
-          open={uploadModalOpen}
-          onClose={() => setUploadModalOpen(false)}
-          maxWidth="sm"
-          fullWidth
-        >
-          
-        </Dialog> */}
             <Box className="max-w-7xl mx-auto px-4 py-8">
-            {analysisResult && (
-                <Box className="flex justify-end space-x-4 mb-8">
-                    <Button
-                        variant="contained"
-                        startIcon={<VisibilityIcon />}
-                        onClick={() => setVisualizationModalOpen(true)}
-                        sx={{
-                            backgroundColor: '#4f46e5',
-                            '&:hover': {
-                                backgroundColor: '#4338ca'
-                            },
-                            textTransform: 'none',
-                            borderRadius: '0.5rem',
-                            padding: '0.5rem 1rem'
-                        }}
-                    >
-                        View Analysis Dashboard
-                    </Button>
-                </Box>
-            )}
+                {analysisResult && (
+                    <Box className="flex justify-end space-x-4 mb-8">
+                        <Button
+                            variant="contained"
+                            startIcon={<VisibilityIcon />}
+                            onClick={() => setVisualizationModalOpen(true)}
+                            sx={{
+                                backgroundColor: '#4f46e5',
+                                '&:hover': {
+                                    backgroundColor: '#4338ca'
+                                },
+                                textTransform: 'none',
+                                borderRadius: '0.5rem',
+                                padding: '0.5rem 1rem'
+                            }}
+                        >
+                            View Analysis Dashboard
+                        </Button>
+                    </Box>
+                )}
 
                 <Box className="text-center py-12">
                     <Typography variant="h6" className="text-white mb-4 font-semibold">
                         Upload testimony for analysis
                     </Typography>
-                    {/* <Typography variant="body1" className="text-gray-500 max-w-2xl mx-auto">
-                        Upload historical war testimonies for analysis and preservation to help maintain the memory of significant historical events
-                    </Typography> */}
                 </Box>
 
                 <motion.div
@@ -582,7 +473,7 @@ const Home: React.FC = () => {
                         <Box className="space-y-6">
                             {/* Two-column grid for Emotional, Topics, and People */}
                             <Box className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                {/* Left Column */}
+                                {/* Emotion and topic data Column */}
                                 <Box className="space-y-6">
                                     <Paper sx={{ padding: '1rem' }}>
                                         <Box className="flex items-center space-x-2 mb-4">
@@ -618,7 +509,7 @@ const Home: React.FC = () => {
                                     </Paper>
                                 </Box>
 
-                                {/* Right Column */}
+                                {/* Biological Data */}
                                 <Box className="space-y-6">
                                     <Paper sx={{ padding: '1rem' }}>
                                         <Box className="flex items-center space-x-2 mb-4">
@@ -660,7 +551,7 @@ const Home: React.FC = () => {
                                 </Box>
                             </Box>
 
-                            {/* Full-width Geographical Data */}
+                            {/* Geographical Data */}
                             <Paper sx={{ padding: '1rem' }}>
                                 <Box className="flex items-center justify-between mb-4">
                                     <Box className="flex items-center space-x-2">

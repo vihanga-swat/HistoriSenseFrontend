@@ -18,9 +18,24 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Function to check if token is expired
+    const isTokenExpired = (token: string): boolean => {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.exp < Date.now() / 1000;
+      } catch (error) {
+        return true;
+      }
+    };
     // Check if user is already authenticated
     const token = localStorage.getItem('token');
     if (token) {
+      // Check if token is expired
+      if (isTokenExpired(token)) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        return;
+      }
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       // Redirect based on user role
       if (user.role === 'museum') {
@@ -181,21 +196,6 @@ const Login = () => {
               />
             </div>
 
-            {/* <div className="flex items-center justify-between">
-              <label className="flex items-center space-x-2 text-sm">
-                <Checkbox
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="text-indigo-600"
-                  size="small"
-                />
-                <span className="text-gray-600">Remember me</span>
-              </label>
-              <a href="#" className="text-indigo-600 text-sm hover:underline">
-                Forgot Password?
-              </a>
-            </div> */}
-
             <button
               type="submit"
               className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center space-x-2"
@@ -203,29 +203,6 @@ const Login = () => {
               <LoginIcon />
               <span>Sign In</span>
             </button>
-
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1">
-              <button
-                type="button"
-                className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <img
-                  src="https://www.svgrepo.com/show/475656/google-color.svg"
-                  alt="Google"
-                  className="w-5 h-5 mr-2"
-                />
-                Google
-              </button>
-            </div>
 
             <p className="text-center text-gray-600 text-sm">
               Don't have an account?{' '}

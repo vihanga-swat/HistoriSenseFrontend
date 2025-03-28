@@ -296,29 +296,6 @@ const Signup = () => {
               <span>Create Account</span>
             </button>
 
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1">
-              <button
-                type="button"
-                className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <img
-                  src="https://www.svgrepo.com/show/475656/google-color.svg"
-                  alt="Google"
-                  className="w-5 h-5 mr-2"
-                />
-                Google
-              </button>
-            </div>
-
             <p className="text-center text-gray-600 text-sm">
               Already have an account?{' '}
               <a href="/login" className="text-indigo-600 hover:underline">

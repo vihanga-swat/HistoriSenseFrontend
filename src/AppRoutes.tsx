@@ -1,20 +1,38 @@
-// AppRoutes.tsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import Login from './screens/Login';
 import Signup from './screens/Signup';
 import MHome from './screens/MuseumHome';
 import IHome from './screens/Home';
 
-const PrivateRoute = ({ children, requiredRole }: { children: React.ReactNode; requiredRole?: string }) => {
-  const isAuthenticated = localStorage.getItem('token');
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  console.log('Checking authentication:', isAuthenticated);
-  console.log('User role:', user.role);
+// Function to check if token is expired
+const isTokenExpired = (token: string | null): boolean => {
+  if (!token) return true;
+  
+  try {
+    // Get payload from JWT token
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    // Check if token is expired
+    return payload.exp < Date.now() / 1000;
+  } catch (error) {
+    return true;
+  }
+};
 
-  if (!isAuthenticated) {
-    console.log('Redirecting to login because not authenticated');
+const PrivateRoute = ({ children, requiredRole }: { children: React.ReactNode; requiredRole?: string }) => {
+  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  
+  // Check if token is expired or missing
+  if (!token || isTokenExpired(token)) {
+    console.log('Redirecting to login because token is expired or missing');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     return <Navigate to="/login" replace />;
   }
+
+  console.log('Checking authentication:', token ? 'Token exists' : 'No token');
+  console.log('User role:', user.role);
 
   if (requiredRole && user.role !== requiredRole) {
     console.log('Redirecting due to insufficient role');
@@ -25,8 +43,37 @@ const PrivateRoute = ({ children, requiredRole }: { children: React.ReactNode; r
 };
 
 const AppRoutes = () => {
-  const isAuthenticated = localStorage.getItem('token');
+  // Check token expiration on initial load and setup periodic check
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    
+    if (token && isTokenExpired(token)) {
+      console.log('Token expired on initial load, clearing session');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    
+    // Set up periodic token expiration check
+    const checkTokenInterval = setInterval(() => {
+      const currentToken = localStorage.getItem('token');
+      if (currentToken && isTokenExpired(currentToken)) {
+        console.log('Token expired during interval check, clearing session');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        clearInterval(checkTokenInterval);
+      }
+    }, 60000); // Check every minute
+    
+    return () => {
+      clearInterval(checkTokenInterval);
+    };
+  }, []);
+
+  const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const isValidToken = token && !isTokenExpired(token);
 
   return (
     <Router>
@@ -55,7 +102,7 @@ const AppRoutes = () => {
 
         {/* Default Route */}
         <Route path="/" element={
-          isAuthenticated ? (
+          isValidToken ? (
             user.role === 'museum' ? (
               <Navigate to="/museum-home" replace />
             ) : (
