@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Typography,
   Button,
@@ -32,7 +32,8 @@ import PersonIcon from '@mui/icons-material/Person';
 import PublicIcon from '@mui/icons-material/Public';
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import Chart from 'chart.js/auto';
-import { MapContainer, TileLayer, CircleMarker, Polyline, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Marker, Polyline, Popup, Tooltip } from 'react-leaflet';
+import { divIcon } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 import { useNavigate } from 'react-router-dom';
@@ -48,6 +49,13 @@ interface Testimony {
   topics: { [key: string]: number };
   upload_date: string;
   file_type: string;
+}
+
+interface GeocodedLocation {
+  name: string;
+  coordinates: [number, number];
+  count: number;
+  description?: string;
 }
 
 const MHome: React.FC = () => {
@@ -68,12 +76,14 @@ const MHome: React.FC = () => {
   const [selectedTestimony, setSelectedTestimony] = useState<Testimony | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<boolean>(false);
   const [testimonyToDelete, setTestimonyToDelete] = useState<string | null>(null);
+  const [geocodedLocations, setGeocodedLocations] = useState<GeocodedLocation[]>([]);
+  const [hoveredLocation, setHoveredLocation] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
   const isTokenExpired = (token: string | null): boolean => {
     if (!token) return true;
-    
+
     try {
       // Get payload from JWT token
       const payload = JSON.parse(atob(token.split('.')[1]));
@@ -135,10 +145,10 @@ const MHome: React.FC = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/museum-testimonies', { 
-        headers: { 'Authorization': `Bearer ${token}` } 
+      const response = await fetch('http://localhost:5000/api/museum-testimonies', {
+        headers: { 'Authorization': `Bearer ${token}` }
       });
-      
+
       // Handle 401 Unauthorized response
       if (response.status === 401) {
         localStorage.removeItem('token');
@@ -146,7 +156,7 @@ const MHome: React.FC = () => {
         navigate('/login', { replace: true });
         return;
       }
-      
+
       const data = await response.json();
       setTestimonies(data.testimonies || []);
     } catch (error) {
@@ -193,7 +203,7 @@ const MHome: React.FC = () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Authentication token not found.');
-      
+
       if (isTokenExpired(token)) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -210,12 +220,12 @@ const MHome: React.FC = () => {
         formData.append(`description_${file.name}`, descriptionInput?.value || '');
       });
 
-      const response = await fetch('http://localhost:5000/api/analyze-testimony', { 
-        method: 'POST', 
-        headers: { 'Authorization': `Bearer ${token}` }, 
-        body: formData 
+      const response = await fetch('http://localhost:5000/api/analyze-testimony', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
       });
-      
+
       // Handle 401 Unauthorized response
       if (response.status === 401) {
         localStorage.removeItem('token');
@@ -241,6 +251,53 @@ const MHome: React.FC = () => {
     }
   };
 
+  const geocodeLocations = useCallback(async (locations: { [key: string]: any }) => {
+    const geocodedLocations: GeocodedLocation[] = [];
+
+    for (const [name, data] of Object.entries(locations)) {
+      try {
+        // Use OpenStreetMap's Nominatim API for geocoding
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(name)}`
+        );
+        const results = await response.json();
+
+        if (results && results.length > 0) {
+          geocodedLocations.push({
+            name,
+            coordinates: [parseFloat(results[0].lat), parseFloat(results[0].lon)],
+            count: typeof data === 'object' ? data.count || 0 : data,
+            description: typeof data === 'object' ? data.description || 'Mentioned in testimony' : `Mentioned ${data} times`
+          });
+        } else {
+          console.warn(`Could not geocode location: ${name}`);
+        }
+      } catch (error) {
+        console.error(`Error geocoding ${name}:`, error);
+      }
+    }
+
+    return geocodedLocations;
+  }, []);
+
+  useEffect(() => {
+    if (selectedTestimony?.locations) {
+      geocodeLocations(selectedTestimony.locations)
+        .then(locations => {
+          setGeocodedLocations(locations);
+        });
+    }
+  }, [selectedTestimony, geocodeLocations]);
+
+  const createNumberedMarker = (number: number, isHighlighted: boolean) => {
+    return divIcon({
+      className: 'custom-numbered-marker',
+      html: `<div class="marker-number ${isHighlighted ? 'highlighted' : ''}">${number}</div>`,
+      iconSize: [30, 30],
+      iconAnchor: [15, 30]
+    });
+  };
+
   const viewTestimony = async (filename: string) => {
     try {
       const token = localStorage.getItem('token');
@@ -251,10 +308,10 @@ const MHome: React.FC = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/museum-testimony/${filename}`, { 
-        headers: { 'Authorization': `Bearer ${token}` } 
+      const response = await fetch(`http://localhost:5000/api/museum-testimony/${filename}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
       });
-      
+
       // Handle 401 Unauthorized response
       if (response.status === 401) {
         localStorage.removeItem('token');
@@ -262,7 +319,7 @@ const MHome: React.FC = () => {
         navigate('/login', { replace: true });
         return;
       }
-      
+
       const data = await response.json();
       setSelectedTestimony(data.testimony);
       setVisualizationModalOpen(true);
@@ -345,7 +402,7 @@ const MHome: React.FC = () => {
       if (!token) {
         throw new Error('Authentication token not found. Please log in again.');
       }
-      
+
       if (isTokenExpired(token)) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -359,7 +416,7 @@ const MHome: React.FC = () => {
           'Authorization': `Bearer ${token}`,
         },
       });
-      
+
       // Handle 401 Unauthorized response
       if (response.status === 401) {
         localStorage.removeItem('token');
@@ -774,19 +831,73 @@ const MHome: React.FC = () => {
                   </Box>
                 </Box>
                 <Box className="h-[400px] rounded-lg">
-                  <MapContainer center={[51.5074, -0.1278]} zoom={5} className="h-full w-full">
-                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='© OpenStreetMap contributors' />
-                    {showEvents && Object.entries(selectedTestimony.locations).map(([location, data]: [string, any], idx) => (
-                      <CircleMarker key={idx} center={[51.5074 + idx * 0.1, -0.1278 + idx * 0.1]} radius={8} fillColor="#4f46e5" color="#fff" weight={2} opacity={1} fillOpacity={0.8}>
+                  <style>{`
+                    .custom-numbered-marker {
+                      background: none;
+                      border: none;
+                    }
+                    .marker-number {
+                      width: 24px;
+                      height: 24px;
+                      background-color: #4f46e5;
+                      color: white;
+                      border-radius: 50%;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-weight: bold;
+                      font-size: 12px;
+                      border: 2px solid white;
+                      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+                    }
+                    .marker-number.highlighted {
+                      background-color: #ef4444;
+                      transform: scale(1.2);
+                      transition: all 0.2s ease;
+                    }
+                  `}</style>
+                  <MapContainer
+                    center={geocodedLocations.length > 0
+                      ? geocodedLocations[0].coordinates
+                      : [51.5074, -0.1278]}
+                    zoom={geocodedLocations.length > 0 ? 4 : 5}
+                    className="h-full w-full"
+                  >
+                    <TileLayer
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      attribution='© OpenStreetMap contributors'
+                    />
+
+                    {showEvents && geocodedLocations.map((location, idx) => (
+                      <Marker
+                        key={idx}
+                        position={location.coordinates}
+                        icon={createNumberedMarker(idx + 1, hoveredLocation === location.name)}
+                        eventHandlers={{
+                          mouseover: () => setHoveredLocation(location.name),
+                          mouseout: () => setHoveredLocation(null)
+                        }}
+                      >
+                        <Tooltip permanent={hoveredLocation === location.name}>
+                          <Typography variant="subtitle2">
+                            {location.name} - {location.count} mention{location.count !== 1 ? 's' : ''}
+                          </Typography>
+                        </Tooltip>
                         <Popup>
-                          <Typography variant="subtitle2">{location}</Typography>
-                          <Typography variant="body2">{data.description}</Typography>
-                          <Typography variant="caption">{data.count} mention(s)</Typography>
+                          <Typography variant="subtitle2">{location.name}</Typography>
+                          <Typography variant="body2">{location.description}</Typography>
+                          <Typography variant="caption">{location.count} mention{location.count !== 1 ? 's' : ''}</Typography>
                         </Popup>
-                      </CircleMarker>
+                      </Marker>
                     ))}
-                    {showMovements && Object.keys(selectedTestimony.locations).length > 1 && (
-                      <Polyline positions={Object.keys(selectedTestimony.locations).map((_, idx) => [51.5074 + idx * 0.1, -0.1278 + idx * 0.1])} color="#10b981" weight={2} dashArray="5, 5" opacity={0.8} />
+
+                    {showMovements && geocodedLocations.length > 1 && (
+                      <Polyline
+                        positions={geocodedLocations.map(loc => loc.coordinates)}
+                        color="#10b981"
+                        weight={3}
+                        opacity={0.8}
+                      />
                     )}
                   </MapContainer>
                 </Box>
