@@ -7,7 +7,7 @@ import {
 import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
 import LoginIcon from '@mui/icons-material/Login';
-import loginImage from "../assets/images/login.webp";
+import loginImage from "../assets/images/Login.png";
 
 const Login = () => {
   const [email, setEmail] = useState('');

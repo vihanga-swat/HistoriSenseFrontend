@@ -633,7 +633,7 @@ const MHome: React.FC = () => {
             <TableBody>
               {testimonies.map((testimony, index) => (
                 <TableRow key={index} className="hover:bg-gray-50">
-                  <TableCell>{testimony.title}</TableCell>
+                  <TableCell>{testimony.title ? testimony.title.replace(/\.[^/.]+$/, "").replace(/_/g, ' '): ""}</TableCell>
                   <TableCell>{new Date(testimony.upload_date).toLocaleDateString()}</TableCell>
                   <TableCell>{testimony.file_type}</TableCell>
                   <TableCell>
@@ -731,7 +731,7 @@ const MHome: React.FC = () => {
       <Dialog open={visualizationModalOpen} onClose={() => setVisualizationModalOpen(false)} maxWidth="lg" fullWidth>
         <DialogTitle className="flex justify-between items-center bg-gray-50 border-b">
           <Box>
-            <Typography variant="h6">{selectedTestimony?.title || 'Analysis Dashboard'}</Typography>
+            <Typography variant="h6">{selectedTestimony?.title ? selectedTestimony.title.replace(/\.[^/.]+$/, "").replace(/_/g, ' '): ""}</Typography>
             <Typography variant="body2">{selectedTestimony?.description || 'Testimony Analysis'}</Typography>
           </Box>
           <IconButton onClick={() => setVisualizationModalOpen(false)}><CloseIcon /></IconButton>
