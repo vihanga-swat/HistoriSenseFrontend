@@ -32,7 +32,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import PublicIcon from '@mui/icons-material/Public';
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import Chart from 'chart.js/auto';
-import { MapContainer, TileLayer, CircleMarker, Marker, Polyline, Popup, Tooltip } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Polyline, Popup, Tooltip } from 'react-leaflet';
 import { divIcon } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -462,16 +462,6 @@ const MHome: React.FC = () => {
         }}
       >
         <DialogContent sx={{ textAlign: 'center', padding: '0 24px 24px' }}>
-          {/* <Typography
-                        variant="h5"
-                        sx={{
-                            fontWeight: 600,
-                            color: '#333333',
-                            marginBottom: '16px',
-                        }}
-                    >
-                        Logout Confirmation
-                    </Typography> */}
           <MeetingRoomIcon className="text-indigo-600 text-3xl" fontSize='large' />
           <Typography
             variant="body1"
