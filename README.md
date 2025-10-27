@@ -1,15 +1,10 @@
-
----
-
-# 🏛️ HistoriSense Frontend
+# 🏛️ HistoriSense
 
 A modern, AI-enhanced platform for exploring, analyzing, and preserving historical testimonies.
 
 - Dual experiences for Individuals and Museum Representatives
 - Interactive maps, emotional analysis, and thematic insights
 - Clean, responsive UI powered by React, TypeScript, and Vite
-
-Preview the logo: `public/Icon.svg`
 
 Badges:
 - React 19
@@ -273,19 +268,13 @@ npm run test
 
 ---
 
-## 🤝 Contributing
+## 👤 Author
 
-We welcome contributions!
+- Name: Vihanga Palihakkara
+- Role: Associate Software Engineer
+- Email: vihangawork@gmail.com
 
-- Fork the repo
-- Create a branch: feature/amazing-improvement
-- Commit with meaningful messages
-- Open a PR with context, screenshots if UI
-
-Please follow:
-- TypeScript best practices
-- Accessible, semantic markup
-- Add or update docs/tests when relevant
+If you use this project in research or demos, a mention would make my day!
 
 ---
 
@@ -295,17 +284,10 @@ This project is developed as a Final Year Project (FYP) for educational and rese
 
 ---
 
-## 👥 Team
-
-Final Year Project Team
-- Add names, roles, and contacts here
-
----
-
 ## 📞 Support
 
 - Open an issue with details, logs, and repro steps
 - Add screenshots for UI issues
-- For general questions, contact the maintainers or create a discussion thread
+- For general questions, contact: vihangawork@gmail.com
 
 ---
