@@ -145,7 +145,7 @@ const MHome: React.FC = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/museum-testimonies', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/museum-testimonies`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -220,7 +220,7 @@ const MHome: React.FC = () => {
         formData.append(`description_${file.name}`, descriptionInput?.value || '');
       });
 
-      const response = await fetch('http://localhost:5000/api/analyze-testimony', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/analyze-testimony`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData
@@ -308,7 +308,7 @@ const MHome: React.FC = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5000/api/museum-testimony/${filename}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/museum-testimony/${filename}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -410,7 +410,7 @@ const MHome: React.FC = () => {
         throw new Error('Your session has expired. Please log in again.');
       }
 
-      const response = await fetch(`http://localhost:5000/api/museum-testimony/${testimonyToDelete}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/museum-testimony/${testimonyToDelete}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

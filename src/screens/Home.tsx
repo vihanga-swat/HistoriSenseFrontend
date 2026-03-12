@@ -181,7 +181,7 @@ const Home: React.FC = () => {
             const formData = new FormData();
             formData.append('files', file);
 
-            const response = await fetch('http://localhost:5000/api/analyze-testimony', {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/analyze-testimony`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData,
