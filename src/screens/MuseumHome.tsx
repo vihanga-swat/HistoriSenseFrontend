@@ -68,7 +68,6 @@ const MHome: React.FC = () => {
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState<boolean>(false);
-  const [uploadSuccess, setUploadSuccess] = useState<boolean>(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -119,7 +118,7 @@ const MHome: React.FC = () => {
     };
   }, [navigate]);
 
-  const UploadContainer = styled(Box)(({ theme }) => ({
+  const UploadContainer = styled(Box)(() => ({
     background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%)',
     border: '2px dashed #9ca3af',
     borderRadius: '12px',
@@ -237,7 +236,6 @@ const MHome: React.FC = () => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Failed to analyze testimonies');
 
-      setUploadSuccess(true);
       setSnackbarOpen(true);
       setFiles([]);
       setUploadModalOpen(false);
@@ -431,7 +429,6 @@ const MHome: React.FC = () => {
       }
 
       setTestimonies(testimonies.filter(t => t.filename !== testimonyToDelete));
-      setUploadSuccess(true);
       setUploadError(null);
       setSnackbarOpen(true);
     } catch (error: any) {

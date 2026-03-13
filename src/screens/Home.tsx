@@ -48,7 +48,6 @@ const Home: React.FC = () => {
     const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
     const [file, setFile] = useState<File | null>(null);
     const [uploading, setUploading] = useState(false);
-    const [uploadSuccess, setUploadSuccess] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -112,7 +111,7 @@ const Home: React.FC = () => {
         }
     };
 
-    const UploadContainer = styled(Box)(({ theme }) => ({
+    const UploadContainer = styled(Box)(() => ({
         background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%)',
         border: '2px dashed #9ca3af',
         borderRadius: '12px',
@@ -198,7 +197,6 @@ const Home: React.FC = () => {
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'Failed to analyze testimony');
 
-            setUploadSuccess(true);
             setSnackbarOpen(true);
             setFile(null);
             setAnalysisResult(data.analysis);
