@@ -1,5 +1,6 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { useEffect } from 'react';
+import { motion } from 'framer-motion';
 import Login from './screens/Login';
 import Signup from './screens/Signup';
 import MHome from './screens/MuseumHome';
@@ -115,17 +116,21 @@ const AppRoutes = () => {
 
         {/* 404 Route */}
         <Route path="*" element={
-          <div className="min-h-screen flex items-center justify-center gradient-bg">
-            <div className="text-center">
-              <h1 className="text-4xl font-bold text-gray-800 mb-4">404</h1>
-              <p className="text-gray-600 mb-4">Page not found</p>
-              <a
-                href="/"
-                className="text-indigo-600 hover:text-indigo-800 transition-colors"
+          <div className="min-h-screen flex items-center justify-center gradient-mesh">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center p-12 glass rounded-3xl"
+            >
+              <h1 className="text-8xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-pink-500 mb-4">404</h1>
+              <p className="text-xl text-muted-foreground mb-8 font-medium">Lost in Time?</p>
+              <Link
+                to="/"
+                className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full font-bold shadow-xl transition-all hover:scale-105 active:scale-95"
               >
-                Go back home
-              </a>
-            </div>
+                Return to Present
+              </Link>
+            </motion.div>
           </div>
         } />
       </Routes>

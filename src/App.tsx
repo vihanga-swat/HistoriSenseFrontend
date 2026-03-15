@@ -1,7 +1,12 @@
 import AppRoutes from "./AppRoutes";
+import { ThemeProvider } from "./components/ThemeProvider";
 
 function App() {
-  return <AppRoutes />;
+  return (
+    <ThemeProvider>
+      <AppRoutes />
+    </ThemeProvider>
+  );
 }
 
 export default App;
