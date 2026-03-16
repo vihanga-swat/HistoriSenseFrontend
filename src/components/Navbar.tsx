@@ -21,12 +21,12 @@ const Navbar: React.FC<NavbarProps> = ({ userName, onLogout }) => {
             <motion.div 
                 initial={{ y: -50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className="w-full max-w-6xl glass rounded-2xl flex items-center justify-between px-6 py-3 shadow-2xl pointer-events-auto border border-white/10"
+                className="w-full max-w-6xl glass rounded-2xl flex items-center justify-between px-6 py-3 shadow-2xl pointer-events-auto border"
             >
                 <Box className="flex items-center gap-3">
                     <motion.div 
                         whileHover={{ rotate: 15 }}
-                        className="bg-indigo-500/20 p-2 rounded-xl"
+                        className="bg-indigo-500/10 p-2 rounded-xl"
                     >
                         <HistoryEduIcon className="text-indigo-500" fontSize="medium" />
                     </motion.div>
@@ -43,14 +43,14 @@ const Navbar: React.FC<NavbarProps> = ({ userName, onLogout }) => {
                     <Box className="flex items-center gap-3">
                         <IconButton 
                             onClick={toggleTheme} 
-                            className="bg-white/5 hover:bg-white/10 text-foreground"
+                            className="bg-primary/10 hover:bg-primary/20 text-foreground border border-primary/10"
                             size="small"
                         >
                             {mode === 'dark' ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
                         </IconButton>
                         
                         {userName && (
-                            <Box className="flex items-center gap-2 pl-2 border-l border-white/10 h-8">
+                            <Box className="flex items-center gap-2 pl-4 border-l border-foreground/10 h-8">
                                 <Avatar 
                                     sx={{ width: 32, height: 32, bgcolor: 'primary.main', fontSize: '0.875rem' }}
                                     className="shadow-sm"
@@ -59,7 +59,7 @@ const Navbar: React.FC<NavbarProps> = ({ userName, onLogout }) => {
                                 </Avatar>
                                 <Typography 
                                     variant="body2" 
-                                    className="hidden md:block font-semibold"
+                                    className="hidden md:block font-bold"
                                 >
                                     {userName}
                                 </Typography>
@@ -68,12 +68,12 @@ const Navbar: React.FC<NavbarProps> = ({ userName, onLogout }) => {
                     </Box>
 
                     <Button
-                        variant="contained"
+                        variant="outlined"
                         onClick={onLogout}
                         size="small"
                         startIcon={<LogoutIcon fontSize="small" />}
-                        className="bg-white/5 hover:bg-destructive/20 text-foreground rounded-full px-4 border border-white/10 hover:border-destructive/30 transition-all"
-                        sx={{ textTransform: 'none' }}
+                        className="rounded-full px-5 border-foreground/10 hover:border-destructive/40 hover:bg-destructive/5 text-foreground transition-all"
+                        sx={{ textTransform: 'none', fontWeight: 700 }}
                     >
                         Logout
                     </Button>

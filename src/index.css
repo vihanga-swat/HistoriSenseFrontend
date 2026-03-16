@@ -85,24 +85,35 @@
 }
 
 .gradient-mesh {
-  background-color: hsla(240, 100%, 5%, 1);
-  background-image:
-    radial-gradient(at 0% 0%, hsla(243, 75%, 58%, 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, hsla(330, 81%, 60%, 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, hsla(243, 75%, 58%, 0.15) 0px, transparent 50%),
-    radial-gradient(at 0% 100%, hsla(330, 81%, 60%, 0.15) 0px, transparent 50%);
+  background-color: hsl(var(--background));
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(243, 75%, 58%, 0.12) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(330, 81%, 60%, 0.12) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(243, 75%, 58%, 0.12) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, hsla(330, 81%, 60%, 0.12) 0px, transparent 50%);
+}
+
+.dark .gradient-mesh {
+  background-color: hsla(222, 47%, 5%, 1);
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(243, 75%, 58%, 0.2) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(330, 81%, 60%, 0.2) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(243, 75%, 58%, 0.2) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, hsla(330, 81%, 60%, 0.2) 0px, transparent 50%);
 }
 
 .glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
 }
 
 .dark .glass {
   background: rgba(15, 23, 42, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
 .animate-in {

@@ -15,13 +15,13 @@ import {
     Tooltip as MuiTooltip
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import CloseIcon from '@mui/icons-material/Close';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 import TopicIcon from '@mui/icons-material/Topic';
 import PersonIcon from '@mui/icons-material/Person';
 import PublicIcon from '@mui/icons-material/Public';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import Chart from 'chart.js/auto';
 import { MapContainer, TileLayer, Polyline, Marker, Tooltip } from 'react-leaflet';
@@ -29,6 +29,7 @@ import 'leaflet/dist/leaflet.css';
 import { divIcon } from 'leaflet';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { useTheme } from '../components/ThemeProvider';
 
 interface GeocodedLocation {
     name: string;
@@ -62,15 +63,14 @@ const Home: React.FC = () => {
     const topicsChartRef = useRef<Chart | null>(null);
     const [file, setFile] = useState<File | null>(null);
     const [uploading, setUploading] = useState(false);
-    const [uploadError, setUploadError] = useState<string | null>(null);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [analysisResult, setAnalysisResult] = useState<any>(null);
     const [geocodedLocations, setGeocodedLocations] = useState<GeocodedLocation[]>([]);
-    const [hoveredLocation, setHoveredLocation] = useState<string | null>(null);
 
     const navigate = useNavigate();
     const muiTheme = useMuiTheme();
+    const { mode } = useTheme();
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -170,7 +170,6 @@ const Home: React.FC = () => {
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files.length > 0) {
             setFile(event.target.files[0]);
-            setUploadError(null);
         }
     };
 
@@ -195,7 +194,7 @@ const Home: React.FC = () => {
                 setTimeout(() => setVisualizationModalOpen(true), 800);
             }
         } catch (error) {
-            setUploadError('Process failed. Try again.');
+            console.error(error);
         } finally {
             setUploading(false);
         }
@@ -239,23 +238,23 @@ const Home: React.FC = () => {
             <Box component="main" className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pb-12">
                 <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-16">
                     {/* Header */}
-                    <motion.div variants={itemVariants} className="text-center space-y-4">
-                        <Typography variant="h2" className="font-black tracking-tight leading-tight md:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
+                    <motion.div variants={itemVariants} className="text-center space-y-6">
+                        <Typography variant="h2" className="font-extrabold tracking-tight leading-tight md:text-7xl bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 pb-2">
                             Uncover History's <br /> Emotional Pulse
                         </Typography>
-                        <Typography variant="h6" className="text-muted-foreground font-light max-w-2xl mx-auto">
-                            Our AI deciphers raw testimonies to reveal the hidden threads of human experience across time and space.
-                        </Typography>
+                        {/* <Typography variant="h6" className="text-muted-foreground font-normal max-w-3xl mx-auto leading-relaxed">
+                            Our AI deciphers raw testimonies to reveal the hidden threads of human experience across time and space. Discover the stories behind the data.
+                        </Typography> */}
                     </motion.div>
 
                     {/* Upload Central Card */}
                     <motion.div variants={itemVariants} className="relative z-10">
-                        <Paper className="glass rounded-[2rem] p-1 md:p-2 border border-white/5 shadow-2xl overflow-hidden max-w-3xl mx-auto">
+                        <Paper className="glass rounded-[2.5rem] p-1.5 md:p-3 border shadow-2xl overflow-hidden max-w-4xl mx-auto">
                             <Box
-                                className="p-8 md:p-16 rounded-[1.8rem] flex flex-col items-center text-center space-y-8 cursor-pointer relative"
+                                className="p-8 md:p-12 rounded-[2.2rem] flex flex-col items-center text-center space-y-8 cursor-pointer relative transition-all duration-300"
                                 onClick={() => fileInputRef.current?.click()}
                                 component={motion.div}
-                                whileHover={{ backgroundColor: 'rgba(255,255,255,0.02)' }}
+                                whileHover={{ backgroundColor: mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(99, 102, 241, 0.03)' }}
                             >
                                 <Box className="absolute top-4 right-4 group">
                                     <MuiTooltip title="Analysis takes ~10-15 seconds" arrow>
@@ -266,11 +265,11 @@ const Home: React.FC = () => {
                                 <Box className="relative">
                                     <AnimatePresence mode="wait">
                                         {uploading ? (
-                                            <motion.div key="loader" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
+                                            <motion.div key="loader" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                                                 <CircularProgress size={80} thickness={2} className="text-indigo-500" />
                                             </motion.div>
                                         ) : (
-                                            <motion.div key="icon" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} className="bg-indigo-500/10 p-6 rounded-3xl">
+                                            <motion.div key="icon" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="bg-indigo-500/10 p-6 rounded-3xl">
                                                 <CloudUploadIcon className="text-indigo-500" sx={{ fontSize: 60 }} />
                                             </motion.div>
                                         )}
@@ -293,7 +292,7 @@ const Home: React.FC = () => {
                                         <Button
                                             variant="outlined"
                                             onClick={(e) => { e.stopPropagation(); setFile(null); }}
-                                            className="rounded-full px-8 py-3 border-white/10 hover:border-white/20 capitalize"
+                                            className="rounded-full px-8 py-3 border-foreground/10 hover:border-foreground/20 capitalize"
                                         >
                                             Cancel
                                         </Button>
@@ -310,17 +309,45 @@ const Home: React.FC = () => {
                         </Paper>
                     </motion.div>
 
+                    {/* View Analysis Action */}
+                    <AnimatePresence>
+                        {analysisResult && !visualizationModalOpen && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className="flex justify-center"
+                            >
+                                <Button
+                                    variant="contained"
+                                    startIcon={<VisibilityIcon />}
+                                    onClick={() => setVisualizationModalOpen(true)}
+                                    className="bg-indigo-600 hover:bg-indigo-700 rounded-full px-10 py-4 text-lg font-bold shadow-indigo-500/20 shadow-2xl capitalize hover:scale-105 transition-all gap-3"
+                                >
+                                    View Dashboard
+                                </Button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
                     {/* Features Grid */}
-                    {/* <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8">
                         {[
-                            { icon: <PsychologyIcon/>, title: "Sentiment Mapping", desc: "Identify nuanced emotional states across the narrative arc." },
-                            { icon: <PublicIcon/>, title: "Geospatial Intelligence", desc: "Trace historical movements and significant locations mentioned." },
-                            { icon: <TopicIcon/>, title: "Semantic Theme Extraction", desc: "Uncover core motifs and recurring subject matter automatically." }
+                            { icon: <PsychologyIcon sx={{ fontSize: 32 }} />, title: "Sentiment Mapping", desc: "Identify nuanced emotional states and sentiment shifts across the narrative arc of historical records." },
+                            { icon: <PublicIcon sx={{ fontSize: 32 }} />, title: "Geospatial Intelligence", desc: "Our AI traces historical movements and maps out significant locations mentioned in testimonies." },
+                            { icon: <TopicIcon sx={{ fontSize: 32 }} />, title: "Semantic Themes", desc: "Uncover core motifs, recurring subject matter, and hidden historical context automatically." }
                         ].map((feat, i) => (
-                            <Box key={i} className="glass p-8 rounded-3xl border border-white/5 space-y-4">
-                                <Box className="text-indigo-400">{feat.icon}</Box>
-                                <Typography variant="h6" className="font-bold">{feat.title}</Typography>
-                                <Typography variant="body2" className="text-muted-foreground leading-relaxed">{feat.desc}</Typography>
+                            <Box
+                                key={i}
+                                className="glass p-10 rounded-[2rem] space-y-6 hover:translate-y-[-8px] transition-all duration-300 group"
+                            >
+                                <Box className="w-16 h-16 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 group-hover:bg-indigo-500 group-hover:text-white transition-all duration-300">
+                                    {feat.icon}
+                                </Box>
+                                <Box className="space-y-3">
+                                    <Typography variant="h5" className="font-bold tracking-tight">{feat.title}</Typography>
+                                    <Typography variant="body1" className="text-muted-foreground leading-relaxed">{feat.desc}</Typography>
+                                </Box>
                             </Box>
                         ))}
                     </motion.div> */}
@@ -333,20 +360,26 @@ const Home: React.FC = () => {
                 onClose={() => setVisualizationModalOpen(false)}
                 maxWidth="lg"
                 fullWidth
-                PaperProps={{ className: "glass rounded-[2.5rem] mt-10 md:mt-20", sx: { backgroundImage: 'none' } }}
+                PaperProps={{
+                    className: "glass rounded-[2rem]",
+                    sx: {
+                        backgroundImage: 'none',
+                        maxHeight: '90vh'
+                    }
+                }}
             >
-                <DialogTitle className="flex justify-between items-center p-8 border-b border-white/5">
+                <DialogTitle className="flex justify-between items-center px-8 py-6 border-b border-foreground/5">
                     <Box>
-                        <Typography variant="h4" className="font-black">Deep Insights</Typography>
+                        <Typography variant="h5" className="font-black">Deep Insights</Typography>
                         <Typography variant="body2" className="text-muted-foreground mt-1">
                             Analyzed results for <span className="text-indigo-400 font-bold">{analysisResult?.title || 'Unknown Source'}</span>
                         </Typography>
                     </Box>
-                    <IconButton onClick={() => setVisualizationModalOpen(false)} className="bg-white/5"><CloseIcon /></IconButton>
+                    <IconButton onClick={() => setVisualizationModalOpen(false)} className="bg-foreground/5 hover:bg-foreground/10 transition-colors"><CloseIcon /></IconButton>
                 </DialogTitle>
-                <DialogContent className="p-8">
+                <DialogContent className="p-6 md:p-8 scrollbar-hide">
                     {analysisResult && (
-                        <Box className="space-y-8">
+                        <Box className="space-y-6">
                             {/* Summary Metrics */}
                             <Box className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 {[
@@ -355,43 +388,49 @@ const Home: React.FC = () => {
                                     { label: 'Topics', val: Object.keys(analysisResult.topics).length, color: 'text-emerald-400' },
                                     { label: 'People', val: analysisResult.people_mentioned.length, color: 'text-orange-400' }
                                 ].map((m, i) => (
-                                    <Box key={i} className="bg-white/5 p-6 rounded-2xl border border-white/5 text-center">
-                                        <Typography variant="h4" className={`font-black ${m.color}`}>{m.val}</Typography>
-                                        <Typography variant="caption" className="text-muted-foreground font-bold uppercase tracking-widest">{m.label}</Typography>
+                                    <Box key={i} className="bg-foreground/5 p-4 rounded-2xl border border-foreground/5 text-center transition-all hover:bg-foreground/10">
+                                        <Typography variant="h5" className={`font-black ${m.color}`}>{m.val}</Typography>
+                                        <Typography variant="caption" className="text-muted-foreground font-bold uppercase tracking-widest text-[10px]">{m.label}</Typography>
                                     </Box>
                                 ))}
                             </Box>
 
-                            <Box className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                                <Box className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <Paper className="p-8 glass rounded-3xl border-none shadow-none">
-                                        <Typography variant="h6" className="font-bold mb-8 flex items-center gap-2">
-                                            <PsychologyIcon className="text-indigo-400" /> Sentiment Profile
-                                        </Typography>
-                                        <Box className="h-64"><canvas id="emotionsChart"></canvas></Box>
-                                    </Paper>
-                                    <Paper className="p-8 glass rounded-3xl border-none shadow-none">
-                                        <Typography variant="h6" className="font-bold mb-8 flex items-center gap-2">
-                                            <TopicIcon className="text-emerald-400" /> Focus Domains
-                                        </Typography>
-                                        <Box className="h-64"><canvas id="topicsChart"></canvas></Box>
-                                    </Paper>
-                                    <Paper className="lg:col-span-2 p-8 glass rounded-3xl border-none shadow-none">
-                                        <Box className="flex justify-between items-center mb-8">
-                                            <Typography variant="h6" className="font-bold flex items-center gap-2">
+                            <Box className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                                {/* Left Column Group */}
+                                <Box className="lg:col-span-8 flex flex-col gap-6">
+                                    {/* Charts Row */}
+                                    <Box className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <Paper className="p-6 glass rounded-2xl border-none shadow-none">
+                                            <Typography variant="subtitle1" className="font-bold mb-4 flex items-center gap-2">
+                                                <PsychologyIcon className="text-indigo-400" /> Sentiment Profile
+                                            </Typography>
+                                            <Box className="h-48"><canvas id="emotionsChart"></canvas></Box>
+                                        </Paper>
+                                        <Paper className="p-6 glass rounded-2xl border-none shadow-none">
+                                            <Typography variant="subtitle1" className="font-bold mb-4 flex items-center gap-2">
+                                                <TopicIcon className="text-emerald-400" /> Focus Domains
+                                            </Typography>
+                                            <Box className="h-48"><canvas id="topicsChart"></canvas></Box>
+                                        </Paper>
+                                    </Box>
+
+                                    {/* Map Section */}
+                                    <Paper className="p-6 glass rounded-2xl border-none shadow-none">
+                                        <Box className="flex justify-between items-center mb-4">
+                                            <Typography variant="subtitle1" className="font-bold flex items-center gap-2">
                                                 <PublicIcon className="text-red-400" /> Historical Trajectory
                                             </Typography>
                                             <Box className="flex gap-2">
-                                                <Button size="small" onClick={() => setShowEvents(!showEvents)} variant={showEvents ? 'contained' : 'text'} className="rounded-full px-4 capitalize">Events</Button>
-                                                <Button size="small" onClick={() => setShowMovements(!showMovements)} variant={showMovements ? 'contained' : 'text'} className="rounded-full px-4 capitalize">Flow</Button>
+                                                <Button size="small" onClick={() => setShowEvents(!showEvents)} variant={showEvents ? 'contained' : 'text'} className="rounded-full px-4 capitalize min-w-[70px]">Events</Button>
+                                                <Button size="small" onClick={() => setShowMovements(!showMovements)} variant={showMovements ? 'contained' : 'text'} className="rounded-full px-4 capitalize min-w-[70px]">Flow</Button>
                                             </Box>
                                         </Box>
-                                        <Box className="h-[400px] rounded-2xl overflow-hidden grayscale-[0.5] contrast-[1.1]">
+                                        <Box className="h-[320px] rounded-xl overflow-hidden grayscale-[0.5] contrast-[1.1] border border-foreground/5">
                                             <MapContainer center={geocodedLocations.length > 0 ? geocodedLocations[0].coordinates : [20, 0]} zoom={4} className="h-full w-full">
                                                 <TileLayer url={muiTheme.palette.mode === 'dark' ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"} />
                                                 {showEvents && geocodedLocations.map((loc, i) => (
                                                     <Marker key={i} position={loc.coordinates} icon={divIcon({
-                                                        html: `<div class="w-10 h-10 bg-indigo-500 rounded-full border-4 border-white shadow-2xl flex items-center justify-center text-white font-black text-xs transition-transform hover:scale-125">${i + 1}</div>`,
+                                                        html: `<div class="w-8 h-8 bg-indigo-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white font-black text-[10px] transition-transform hover:scale-125">${i + 1}</div>`,
                                                         className: ''
                                                     })}>
                                                         <Tooltip><b>{loc.name}</b><br />{loc.description}</Tooltip>
@@ -403,38 +442,43 @@ const Home: React.FC = () => {
                                     </Paper>
                                 </Box>
 
-                                <Paper className="p-8 glass rounded-3xl border-none shadow-none flex flex-col">
-                                    <Typography variant="h6" className="font-bold mb-8 flex items-center gap-2">
-                                        <PersonIcon className="text-pink-400" /> Network Context
-                                    </Typography>
-                                    <Box className="flex-grow space-y-6 overflow-y-auto pr-2">
-                                        <Box className="bg-indigo-500/5 p-6 rounded-2xl border border-indigo-500/10">
-                                            <Typography variant="caption" className="text-indigo-400 font-black uppercase tracking-[0.2em] block mb-4">The Narrator</Typography>
-                                            <Box className="space-y-3">
-                                                {Object.entries(analysisResult.writer_info).map(([k, v]) => (
-                                                    <Box key={k}>
-                                                        <Typography variant="caption" className="text-muted-foreground capitalize font-bold">{k.replace('_', ' ')}</Typography>
-                                                        <Typography variant="body2" className="font-medium">{String(v) || 'Not specified'}</Typography>
-                                                    </Box>
-                                                ))}
-                                            </Box>
-                                        </Box>
-                                        <Box>
-                                            <Typography variant="caption" className="text-muted-foreground font-black uppercase tracking-[0.2em] block mb-4">Key Characters</Typography>
-                                            <Box className="space-y-3">
-                                                {analysisResult.people_mentioned.slice(0, 10).map((person: any, i: number) => (
-                                                    <Box key={i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all cursor-default">
-                                                        <Box className="w-10 h-10 rounded-full bg-pink-500/10 flex items-center justify-center text-pink-500 font-bold">{person.name.charAt(0)}</Box>
-                                                        <Box>
-                                                            <Typography variant="body2" className="font-bold">{person.name}</Typography>
-                                                            <Typography variant="caption" className="text-muted-foreground">{person.role} • {person.region}</Typography>
+                                {/* Right Column Sidebar */}
+                                <Box className="lg:col-span-4 h-full">
+                                    <Paper className="p-6 glass rounded-2xl border-none shadow-none h-full flex flex-col max-h-[700px]">
+                                        <Typography variant="subtitle1" className="font-bold mb-4 flex items-center gap-2">
+                                            <PersonIcon className="text-pink-400" /> Network Context
+                                        </Typography>
+
+                                        <Box className="flex-grow space-y-6 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-indigo-500/20">
+                                            <Box className="bg-indigo-500/5 p-5 rounded-xl border border-indigo-500/10">
+                                                <Typography variant="caption" className="text-indigo-400 font-extrabold uppercase tracking-[0.2em] block mb-3 text-[9px]">The Narrator</Typography>
+                                                <Box className="space-y-3">
+                                                    {Object.entries(analysisResult.writer_info).map(([k, v]) => (
+                                                        <Box key={k}>
+                                                            <Typography variant="caption" className="text-muted-foreground capitalize font-bold text-[10px]">{k.replace('_', ' ')}</Typography>
+                                                            <Typography variant="body2" className="font-medium text-[13px]">{String(v) || 'Not specified'}</Typography>
                                                         </Box>
-                                                    </Box>
-                                                ))}
+                                                    ))}
+                                                </Box>
+                                            </Box>
+
+                                            <Box>
+                                                <Typography variant="caption" className="text-muted-foreground font-extrabold uppercase tracking-[0.2em] block mb-3 text-[9px]">Key Characters</Typography>
+                                                <Box className="space-y-2">
+                                                    {analysisResult.people_mentioned.slice(0, 10).map((person: any, i: number) => (
+                                                        <Box key={i} className="flex items-center gap-3 p-2.5 rounded-xl bg-foreground/5 border border-transparent hover:border-indigo-500/20 hover:bg-foreground/10 transition-all cursor-default">
+                                                            <Box className="w-9 h-9 rounded-full bg-pink-500/10 flex items-center justify-center text-pink-500 font-bold text-sm">{person.name.charAt(0)}</Box>
+                                                            <Box className="min-w-0">
+                                                                <Typography variant="body2" className="font-bold text-[13px] truncate">{person.name}</Typography>
+                                                                <Typography variant="caption" className="text-muted-foreground text-[11px] block truncate">{person.role} • {person.region}</Typography>
+                                                            </Box>
+                                                        </Box>
+                                                    ))}
+                                                </Box>
                                             </Box>
                                         </Box>
-                                    </Box>
-                                </Paper>
+                                    </Paper>
+                                </Box>
                             </Box>
                         </Box>
                     )}
